@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    tools:context=".MainActivity"
+    android:orientation="vertical">
+
+    <View
+        android:layout_width="100dp"
+        android:layout_height="300dp"
+        android:background="#A0A"/>
+
+    <com.pyjtlk.widget.TreeView
+        android:id="@+id/treeView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="#A00"
+        app:treeDirection="leftToRight"
+        app:levelInterval="20dp">
+
+        <View
+            android:layout_width="50dp"
+            android:layout_height="100dp"
+            android:background="#A0A" />
+
+        <View
+            android:layout_width="50dp"
+            android:layout_height="100dp"
+            android:background="#A0A0"/>
+
+        <View
+            android:layout_width="50dp"
+            android:layout_height="100dp"
+            android:background="#A00A"/>
+
+        <View
+            android:layout_width="50dp"
+            android:layout_height="100dp"
+            android:background="#A0AA"/>
+
+        <View
+            android:layout_width="50dp"
+            android:layout_height="100dp"
+            android:background="#AA0A"/>
+
+    </com.pyjtlk.widget.TreeView>
+
+</LinearLayout>

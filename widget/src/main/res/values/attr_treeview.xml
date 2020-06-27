@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="TreeView">
+        <attr name="levelInterval" format="dimension"/>
+        <attr name="treeDirection" format="enum">
+            <enum name="leftToRight" value="0"/>
+            <enum name="rightToLeft" value="1"/>
+            <enum name="upToDown" value="2"/>
+            <enum name="downToUp" value="3"/>
+        </attr>
+    </declare-styleable>
+</resources>
