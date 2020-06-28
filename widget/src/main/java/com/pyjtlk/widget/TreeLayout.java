@@ -7,7 +7,6 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -21,6 +20,7 @@ public class TreeLayout extends ViewGroup {
     private Rect mStartRect;
     private Rect mEndRect;
     private int mLevelInterval;
+    private int mTreeDirection;
 
     public static class LayoutParams extends MarginLayoutParams{
         public LayoutParams(Context c, AttributeSet attrs) {
@@ -65,7 +65,12 @@ public class TreeLayout extends ViewGroup {
         init(context,attrs);
     }
 
-    private void init(Context context, AttributeSet attrs){
+    private void init(Context context,AttributeSet attrs){
+        TypedArray typedArray = context.obtainStyledAttributes(attrs,R.styleable.TreeView);
+        mTreeDirection = typedArray.getInt(R.styleable.TreeView_treeDirection,0);
+        mLevelInterval = typedArray.getDimensionPixelSize(R.styleable.TreeView_levelInterval,0);
+        typedArray.recycle();
+
         mPaint = new Paint();
         mPaint.setAntiAlias(true);
 
@@ -125,6 +130,7 @@ public class TreeLayout extends ViewGroup {
         }
 
         wrapWidth += maxWidth;
+        wrapWidth += mLevelInterval;
 
         return wrapWidth;
     }
@@ -172,7 +178,7 @@ public class TreeLayout extends ViewGroup {
                 rootLeft + root.getMeasuredWidth(),
                 rootTop + root.getMeasuredHeight());
 
-        int childLeftWithoutMargin = rootLeft + root.getMeasuredWidth() + rootLayoutParams.rightMargin;
+        int childLeftWithoutMargin = rootLeft + root.getMeasuredWidth() + rootLayoutParams.rightMargin + mLevelInterval;
         int childLeft;
         int childTop = 0;
 
@@ -189,9 +195,7 @@ public class TreeLayout extends ViewGroup {
         }
     }
 
-    @Override
-    public void onDraw(Canvas canvas) {
-        //super.onDrawForeground(canvas);
+    protected void onDrawOnToppest(Canvas canvas){
         View root = getChildAt(0);
         mStartRect.left = root.getLeft();
         mStartRect.right = root.getRight();
@@ -213,8 +217,25 @@ public class TreeLayout extends ViewGroup {
         return new LayoutParams(getContext(),attrs);
     }
 
+    @Override
+    public void draw(Canvas canvas) {
+        super.draw(canvas);
+        onDrawOnToppest(canvas);
+    }
+
     public void setLineDrawer(LineDrawer lineDrawer){
         mLineDrawer = lineDrawer;
+        requestLayout();
+        invalidate();
+    }
+
+    public int getLevelInterval() {
+        return mLevelInterval;
+    }
+
+    public void setmLevelInterval(int levelInterval) {
+        this.mLevelInterval = levelInterval;
+        requestLayout();
         invalidate();
     }
 

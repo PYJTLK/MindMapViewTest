@@ -9,9 +9,11 @@ import com.pyjtlk.widget.TreeLayout;
 
 public class DirectLineDrawer extends TreeLayout.LineDrawer {
     private int mLineWidth;
+    private int mColor;
 
-    public DirectLineDrawer(int lineWidth){
+    public DirectLineDrawer(int lineWidth,int color){
         mLineWidth = lineWidth;
+        mColor = color;
     }
 
     @Override
@@ -26,9 +28,25 @@ public class DirectLineDrawer extends TreeLayout.LineDrawer {
         startY = (start.top + start.bottom) / 2;
         endY = (end.top + end.bottom)  /2;
 
-        paint.setColor(Color.LTGRAY);
+        paint.setColor(mColor);
         paint.setStrokeCap(Paint.Cap.ROUND);
         paint.setStrokeWidth(mLineWidth);
         canvas.drawLine(startX,startY,endX,endY,paint);
+    }
+
+    public int getLineWidth() {
+        return mLineWidth;
+    }
+
+    public void setLineWidth(int lineWidth) {
+        this.mLineWidth = lineWidth;
+    }
+
+    public int getColor() {
+        return mColor;
+    }
+
+    public void setmColor(int color) {
+        this.mColor = color;
     }
 }
