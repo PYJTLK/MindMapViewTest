@@ -12,6 +12,10 @@ import android.view.ViewGroup;
 
 public class TreeLayout extends ViewGroup {
     public final static String TAG = "TAG_TreeLayout";
+    public static final int DIRECTION_LEFT_TO_RIGHT = 0;
+    public static final int DIRECTION_RIGHT_TO_LEFT = 1;
+    public static final int DIRECTION_UP_TO_DOWN = 2;
+    public static final int DIRECTION_DOWN_TO_UP = 3;
 
     private int mWrapWidth;
     private int mWrapHeight;
@@ -80,7 +84,19 @@ public class TreeLayout extends ViewGroup {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        //super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        measureChildren(widthMeasureSpec,heightMeasureSpec);
+
+        mWrapWidth = measureWrapContentWidthHorizontal();
+        mWrapHeight = measureWrapContentHeightHorizontal();
+
+       if(mTreeDirection == DIRECTION_LEFT_TO_RIGHT || mTreeDirection == DIRECTION_RIGHT_TO_LEFT){
+           measureHorizontal(widthMeasureSpec,heightMeasureSpec);
+       }else{
+           measureVertical(widthMeasureSpec,heightMeasureSpec);
+       }
+    }
+
+    protected void measureHorizontal(int widthMeasureSpec, int heightMeasureSpec){
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int widthMode = MeasureSpec.getMode(widthMeasureSpec);
         int height = MeasureSpec.getSize(heightMeasureSpec);
@@ -88,8 +104,8 @@ public class TreeLayout extends ViewGroup {
 
         measureChildren(widthMeasureSpec,heightMeasureSpec);
 
-        mWrapWidth = measureWrapContentWidth();
-        mWrapHeight = measureWrapContentHeight();
+        mWrapWidth = measureWrapContentWidthHorizontal();
+        mWrapHeight = measureWrapContentHeightHorizontal();
 
         if(widthMode == MeasureSpec.AT_MOST){
             width = mWrapWidth;
@@ -102,7 +118,29 @@ public class TreeLayout extends ViewGroup {
         setMeasuredDimension(MeasureSpec.makeMeasureSpec(width,widthMode),MeasureSpec.makeMeasureSpec(height,heightMode));
     }
 
-    private int measureWrapContentWidth(){
+    protected void measureVertical(int widthMeasureSpec, int heightMeasureSpec){
+        int width = MeasureSpec.getSize(widthMeasureSpec);
+        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+        int height = MeasureSpec.getSize(heightMeasureSpec);
+        int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+
+        measureChildren(widthMeasureSpec,heightMeasureSpec);
+
+        mWrapWidth = measureWrapContentWidthHorizontal();
+        mWrapHeight = measureWrapContentHeightHorizontal();
+
+        if(widthMode == MeasureSpec.AT_MOST){
+            width = mWrapWidth;
+        }
+
+        if(heightMode == MeasureSpec.AT_MOST){
+            height = mWrapHeight;
+        }
+
+        setMeasuredDimension(MeasureSpec.makeMeasureSpec(width,widthMode),MeasureSpec.makeMeasureSpec(height,heightMode));
+    }
+
+    private int measureWrapContentWidthHorizontal(){
         int childCount = getChildCount();
 
         if(childCount <= 0){
@@ -135,7 +173,7 @@ public class TreeLayout extends ViewGroup {
         return wrapWidth;
     }
 
-    private int measureWrapContentHeight(){
+    private int measureWrapContentHeightHorizontal(){
         int childCount = getChildCount();
 
         if(childCount <= 0){
@@ -159,6 +197,18 @@ public class TreeLayout extends ViewGroup {
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        switch(mTreeDirection){
+            case DIRECTION_LEFT_TO_RIGHT:
+                onLayoutLeftToRight(changed,l,t,r,b);
+                break;
+
+            case DIRECTION_RIGHT_TO_LEFT:
+                onLayoutRightToLeft(changed,l,t,r,b);
+                break;
+        }
+    }
+
+    protected void onLayoutLeftToRight(boolean changed, int l, int t, int r, int b){
         int childCount = getChildCount();
 
         if(childCount <= 0){
@@ -167,8 +217,6 @@ public class TreeLayout extends ViewGroup {
 
         View root = getChildAt(0);
         LayoutParams rootLayoutParams = (LayoutParams) root.getLayoutParams();
-
-        int height = getMeasuredHeight();
 
         int rootLeft = rootLayoutParams.leftMargin;
         int rootTop = (mWrapHeight - root.getMeasuredHeight()) / 2 + rootLayoutParams.topMargin;
@@ -195,7 +243,46 @@ public class TreeLayout extends ViewGroup {
         }
     }
 
+    protected void onLayoutRightToLeft(boolean changed, int l, int t, int r, int b){
+        int childCount = getChildCount();
+
+        if(childCount <= 0){
+            return;
+        }
+
+        View root = getChildAt(0);
+        LayoutParams rootLayoutParams = (LayoutParams) root.getLayoutParams();
+
+        int rootRight = getMeasuredWidth() - rootLayoutParams.rightMargin;
+        int rootTop = (mWrapHeight - root.getMeasuredHeight()) / 2 + rootLayoutParams.topMargin;
+
+        root.layout(rootRight - root.getMeasuredWidth(),
+                rootTop,
+                rootRight,
+                rootTop + root.getMeasuredHeight());
+
+        int childRightWithoutMargin = rootRight - root.getMeasuredWidth() - rootLayoutParams.leftMargin - mLevelInterval;
+        int childRight;
+        int childTop = 0;
+
+        for(int i = 1;i < childCount;i++){
+            View child = getChildAt(i);
+            LayoutParams layoutParams = (LayoutParams) child.getLayoutParams();
+            childRight = childRightWithoutMargin - layoutParams.rightMargin;
+            childTop += layoutParams.topMargin;
+            child.layout(childRight - child.getMeasuredWidth(),
+                    childTop,
+                    childRight,
+                    childTop + child.getMeasuredHeight());
+            childTop += (child.getMeasuredHeight() + layoutParams.bottomMargin);
+        }
+    }
+
     protected void onDrawOnToppest(Canvas canvas){
+        onDrawLine(canvas);
+    }
+
+    protected void onDrawLine(Canvas canvas){
         View root = getChildAt(0);
         mStartRect.left = root.getLeft();
         mStartRect.right = root.getRight();
@@ -208,7 +295,7 @@ public class TreeLayout extends ViewGroup {
             mEndRect.right = child.getRight();
             mEndRect.top = child.getTop();
             mEndRect.bottom = child.getBottom();
-            mLineDrawer.onDrawLine(canvas,mPaint,mStartRect,mEndRect,0);
+            mLineDrawer.onDrawLine(canvas,mPaint,mStartRect,mEndRect,mTreeDirection);
         }
     }
 
@@ -233,7 +320,7 @@ public class TreeLayout extends ViewGroup {
         return mLevelInterval;
     }
 
-    public void setmLevelInterval(int levelInterval) {
+    public void setLevelInterval(int levelInterval) {
         this.mLevelInterval = levelInterval;
         requestLayout();
         invalidate();

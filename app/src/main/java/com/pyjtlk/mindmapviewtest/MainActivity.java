@@ -22,6 +22,7 @@ public class MainActivity extends AppCompatActivity {
         treeView = findViewById(R.id.treeView);
         treeView.setLineDrawer(new DocumentLineDrawer(6,treeView.getLevelInterval(), Color.WHITE));
 
+        /*
         treeView1 = findViewById(R.id.treeView1);
         treeView1.setLineDrawer(new DocumentLineDrawer(6,treeView.getLevelInterval(),Color.WHITE));
 
@@ -30,5 +31,7 @@ public class MainActivity extends AppCompatActivity {
 
         treeView3 = findViewById(R.id.treeView3);
         treeView3.setLineDrawer(new DocumentLineDrawer(6,treeView.getLevelInterval(),Color.WHITE));
+
+         */
     }
 }

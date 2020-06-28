@@ -23,10 +23,21 @@ public class DirectLineDrawer extends TreeLayout.LineDrawer {
         int endX = 0;
         int endY = 0;
 
-        startX = start.right;
-        endX = end.left;
-        startY = (start.top + start.bottom) / 2;
-        endY = (end.top + end.bottom)  /2;
+        switch(direction){
+            case TreeLayout.DIRECTION_LEFT_TO_RIGHT:
+                startX = start.right;
+                endX = end.left;
+                startY = (start.top + start.bottom) / 2;
+                endY = (end.top + end.bottom)  /2;
+                break;
+
+            case TreeLayout.DIRECTION_RIGHT_TO_LEFT:
+                startX = start.left;
+                endX = end.right;
+                startY = (start.top + start.bottom) / 2;
+                endY = (end.top + end.bottom)  /2;
+                break;
+        }
 
         paint.setColor(mColor);
         paint.setStrokeCap(Paint.Cap.ROUND);
