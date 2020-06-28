@@ -8,45 +8,94 @@
     tools:context=".MainActivity"
     android:orientation="vertical">
 
-    <View
-        android:layout_width="100dp"
-        android:layout_height="300dp"
-        android:background="#A0A"/>
-
-    <com.pyjtlk.widget.TreeView
+    <com.pyjtlk.widget.TreeLayout
         android:id="@+id/treeView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:background="#A00"
+        app:orientation="horizontal"
         app:treeDirection="leftToRight"
         app:levelInterval="20dp">
 
         <View
-            android:layout_width="50dp"
-            android:layout_height="100dp"
-            android:background="#A0A" />
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="#A0A"/>
+
+        <com.pyjtlk.widget.TreeLayout
+            android:id="@+id/treeView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#A00"
+            app:orientation="horizontal"
+            app:treeDirection="leftToRight"
+            app:levelInterval="20dp">
+
+            <View
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="#A0A"/>
+
+            <View
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="#A0A0"
+                android:layout_margin="10dp"/>
+
+            <View
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="#A00A"
+                android:layout_margin="10dp"/>
+
+            <View
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="#A0AA"
+                android:layout_margin="10dp"/>
+
+        </com.pyjtlk.widget.TreeLayout>
 
         <View
-            android:layout_width="50dp"
-            android:layout_height="100dp"
-            android:background="#A0A0"/>
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="#A00A"
+            android:layout_margin="10dp"/>
 
-        <View
-            android:layout_width="50dp"
-            android:layout_height="100dp"
-            android:background="#A00A"/>
+        <com.pyjtlk.widget.TreeLayout
+            android:id="@+id/treeView2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#A00"
+            app:orientation="horizontal"
+            app:treeDirection="leftToRight"
+            app:levelInterval="20dp">
 
-        <View
-            android:layout_width="50dp"
-            android:layout_height="100dp"
-            android:background="#A0AA"/>
+            <View
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="#A0A"/>
 
-        <View
-            android:layout_width="50dp"
-            android:layout_height="100dp"
-            android:background="#AA0A"/>
+            <View
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="#A0A0"
+                android:layout_margin="10dp"/>
 
-    </com.pyjtlk.widget.TreeView>
+            <View
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="#A00A"
+                android:layout_margin="10dp"/>
+
+            <View
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="#A0AA"
+                android:layout_margin="10dp"/>
+
+        </com.pyjtlk.widget.TreeLayout>
+
+    </com.pyjtlk.widget.TreeLayout>
 
 </LinearLayout>

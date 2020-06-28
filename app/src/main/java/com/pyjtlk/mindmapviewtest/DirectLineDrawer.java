@@ -5,10 +5,9 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 
-import com.pyjtlk.widget.TreeView;
-import com.pyjtlk.widget.TreeView.LineDrawer;
+import com.pyjtlk.widget.TreeLayout;
 
-public class DirectLineDrawer extends LineDrawer {
+public class DirectLineDrawer extends TreeLayout.LineDrawer {
     private int mLineWidth;
 
     public DirectLineDrawer(int lineWidth){
@@ -22,21 +21,10 @@ public class DirectLineDrawer extends LineDrawer {
         int endX = 0;
         int endY = 0;
 
-        switch(direction){
-            case TreeView.DIRECTION_LEFT_TO_RIGHT:
-                startX = start.right;
-                endX = end.left;
-                startY = (start.top + start.bottom) / 2;
-                endY = (end.top + end.bottom)  /2;
-                break;
-
-            case TreeView.DIRECTION_RIGHT_TO_LEFT:
-                startX = start.left;
-                endX = end.right;
-                startY = (start.top + start.bottom) / 2;
-                endY = (end.top + end.bottom)  /2;
-                break;
-        }
+        startX = start.right;
+        endX = end.left;
+        startY = (start.top + start.bottom) / 2;
+        endY = (end.top + end.bottom)  /2;
 
         paint.setColor(Color.LTGRAY);
         paint.setStrokeCap(Paint.Cap.ROUND);
