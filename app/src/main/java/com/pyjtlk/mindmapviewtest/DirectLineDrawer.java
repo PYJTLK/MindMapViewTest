@@ -1,7 +1,6 @@
 package com.pyjtlk.mindmapviewtest;
 
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 
@@ -36,6 +35,20 @@ public class DirectLineDrawer extends TreeLayout.LineDrawer {
                 endX = end.right;
                 startY = (start.top + start.bottom) / 2;
                 endY = (end.top + end.bottom)  /2;
+                break;
+
+            case TreeLayout.DIRECTION_UP_TO_DOWN:
+                startX = (start.right + start.left) / 2;
+                endX = (end.right + end.left) / 2;
+                startY = start.bottom;
+                endY = end.top;
+                break;
+
+            case TreeLayout.DIRECTION_DOWN_TO_UP:
+                startX = (start.right + start.left) / 2;
+                endX = (end.right + end.left) / 2;
+                startY = start.top;
+                endY = end.bottom;
                 break;
         }
 

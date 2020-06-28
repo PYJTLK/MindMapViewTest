@@ -102,8 +102,6 @@ public class TreeLayout extends ViewGroup {
         int height = MeasureSpec.getSize(heightMeasureSpec);
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
 
-        measureChildren(widthMeasureSpec,heightMeasureSpec);
-
         mWrapWidth = measureWrapContentWidthHorizontal();
         mWrapHeight = measureWrapContentHeightHorizontal();
 
@@ -118,26 +116,26 @@ public class TreeLayout extends ViewGroup {
         setMeasuredDimension(MeasureSpec.makeMeasureSpec(width,widthMode),MeasureSpec.makeMeasureSpec(height,heightMode));
     }
 
-    protected void measureVertical(int widthMeasureSpec, int heightMeasureSpec){
-        int width = MeasureSpec.getSize(widthMeasureSpec);
-        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
-        int height = MeasureSpec.getSize(heightMeasureSpec);
-        int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+    private int measureWrapContentHeightHorizontal(){
+        int childCount = getChildCount();
 
-        measureChildren(widthMeasureSpec,heightMeasureSpec);
-
-        mWrapWidth = measureWrapContentWidthHorizontal();
-        mWrapHeight = measureWrapContentHeightHorizontal();
-
-        if(widthMode == MeasureSpec.AT_MOST){
-            width = mWrapWidth;
+        if(childCount <= 0){
+            return 0;
         }
 
-        if(heightMode == MeasureSpec.AT_MOST){
-            height = mWrapHeight;
+        View root = getChildAt(0);
+        LayoutParams rootLayoutParams = (LayoutParams) root.getLayoutParams();
+        int rootHeightNeed = rootLayoutParams.topMargin + rootLayoutParams.bottomMargin + root.getMeasuredHeight();
+
+        int childrenHeightNeeded = 0;
+
+        for(int i = 1;i < childCount;i++){
+            View view = getChildAt(i);
+            LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
+            childrenHeightNeeded += (layoutParams.topMargin + layoutParams.bottomMargin + view.getMeasuredHeight());
         }
 
-        setMeasuredDimension(MeasureSpec.makeMeasureSpec(width,widthMode),MeasureSpec.makeMeasureSpec(height,heightMode));
+        return Math.max(rootHeightNeed,childrenHeightNeeded);
     }
 
     private int measureWrapContentWidthHorizontal(){
@@ -173,7 +171,27 @@ public class TreeLayout extends ViewGroup {
         return wrapWidth;
     }
 
-    private int measureWrapContentHeightHorizontal(){
+    protected void measureVertical(int widthMeasureSpec, int heightMeasureSpec){
+        int width = MeasureSpec.getSize(widthMeasureSpec);
+        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+        int height = MeasureSpec.getSize(heightMeasureSpec);
+        int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+
+        mWrapWidth = measureWrapContentWidthVertical();
+        mWrapHeight = measureWrapContentHeightVertical();
+
+        if(widthMode == MeasureSpec.AT_MOST){
+            width = mWrapWidth;
+        }
+
+        if(heightMode == MeasureSpec.AT_MOST){
+            height = mWrapHeight;
+        }
+
+        setMeasuredDimension(MeasureSpec.makeMeasureSpec(width,widthMode),MeasureSpec.makeMeasureSpec(height,heightMode));
+    }
+
+    protected int measureWrapContentWidthVertical(){
         int childCount = getChildCount();
 
         if(childCount <= 0){
@@ -182,17 +200,49 @@ public class TreeLayout extends ViewGroup {
 
         View root = getChildAt(0);
         LayoutParams rootLayoutParams = (LayoutParams) root.getLayoutParams();
-        int rootHeightNeed = rootLayoutParams.topMargin + rootLayoutParams.bottomMargin + root.getMeasuredHeight();
+        int rootWidthNeed = rootLayoutParams.leftMargin + rootLayoutParams.rightMargin + root.getMeasuredWidth();
 
-        int childrenHeightNeeded = 0;
+        int childrenWidthNeed = 0;
 
         for(int i = 1;i < childCount;i++){
             View view = getChildAt(i);
             LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
-            childrenHeightNeeded += (layoutParams.topMargin + layoutParams.bottomMargin + view.getMeasuredHeight());
+            childrenWidthNeed += (layoutParams.leftMargin + layoutParams.rightMargin + view.getMeasuredWidth());
         }
 
-        return Math.max(rootHeightNeed,childrenHeightNeeded);
+        return Math.max(rootWidthNeed,childrenWidthNeed);
+    }
+
+    protected int measureWrapContentHeightVertical(){
+        int childCount = getChildCount();
+
+        if(childCount <= 0){
+            return 0;
+        }
+
+        View root = getChildAt(0);
+        int wrapHeight = 0;
+
+        LayoutParams rootLayoutParams = (LayoutParams) root.getLayoutParams();
+        wrapHeight += (rootLayoutParams.topMargin + rootLayoutParams.bottomMargin + root.getMeasuredHeight());
+
+        if(childCount == 1){
+            return wrapHeight;
+        }
+
+        int maxHeight = 0;
+
+        for(int i = 1;i < childCount;i++){
+            View view = getChildAt(i);
+            LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
+            int heightNeeded = layoutParams.topMargin + layoutParams.bottomMargin + view.getMeasuredHeight();
+            maxHeight = Math.max(maxHeight,heightNeeded);
+        }
+
+        wrapHeight += maxHeight;
+        wrapHeight += mLevelInterval;
+
+        return wrapHeight;
     }
 
     @Override
@@ -205,6 +255,84 @@ public class TreeLayout extends ViewGroup {
             case DIRECTION_RIGHT_TO_LEFT:
                 onLayoutRightToLeft(changed,l,t,r,b);
                 break;
+
+            case DIRECTION_UP_TO_DOWN:
+                onLayoutUpToDown(changed,l,t,r,b);
+                break;
+
+            case DIRECTION_DOWN_TO_UP:
+                onLayoutDownToUp(changed,l,t,r,b);
+                break;
+        }
+    }
+
+    protected void onLayoutUpToDown(boolean changed, int l, int t, int r, int b){
+        int childCount = getChildCount();
+
+        if(childCount <= 0){
+            return;
+        }
+
+        View root = getChildAt(0);
+        LayoutParams rootLayoutParams = (LayoutParams) root.getLayoutParams();
+
+        int rootLeft = (mWrapWidth - root.getMeasuredWidth()) / 2 + rootLayoutParams.leftMargin;
+        int rootTop = rootLayoutParams.topMargin;
+
+        root.layout(rootLeft,
+                rootTop,
+                rootLeft + root.getMeasuredWidth(),
+                rootTop + root.getMeasuredHeight());
+
+        int childTopWithoutMargin = rootTop + root.getMeasuredHeight() + rootLayoutParams.bottomMargin + mLevelInterval;
+        int childTop;
+        int childLeft = 0;
+
+        for(int i = 1;i < childCount;i++){
+            View child = getChildAt(i);
+            LayoutParams layoutParams = (LayoutParams) child.getLayoutParams();
+            childTop = childTopWithoutMargin + layoutParams.topMargin;
+            childLeft += layoutParams.leftMargin;
+            child.layout(childLeft,
+                    childTop,
+                    childLeft + child.getMeasuredWidth(),
+                    childTop + child.getMeasuredHeight());
+            childLeft += (child.getMeasuredWidth() + layoutParams.rightMargin);
+        }
+    }
+
+    protected void onLayoutDownToUp(boolean changed, int l, int t, int r, int b){
+        int childCount = getChildCount();
+
+        if(childCount <= 0){
+            return;
+        }
+
+        View root = getChildAt(0);
+        LayoutParams rootLayoutParams = (LayoutParams) root.getLayoutParams();
+
+        int rootLeft = (mWrapWidth - root.getMeasuredWidth()) / 2 + rootLayoutParams.leftMargin;
+        int rootBottom = getMeasuredHeight() - rootLayoutParams.bottomMargin;
+
+        root.layout(rootLeft,
+                rootBottom - root.getMeasuredHeight(),
+                rootLeft + root.getMeasuredWidth(),
+                rootBottom);
+
+        int childBottomWithoutMargin = rootBottom - root.getMeasuredHeight() - rootLayoutParams.topMargin - mLevelInterval;
+        int childBottom;
+        int childLeft = 0;
+
+        for(int i = 1;i < childCount;i++){
+            View child = getChildAt(i);
+            LayoutParams layoutParams = (LayoutParams) child.getLayoutParams();
+            childBottom = childBottomWithoutMargin - layoutParams.bottomMargin;
+            childLeft += layoutParams.leftMargin;
+            child.layout(childLeft,
+                    childBottom - child.getMeasuredHeight(),
+                    childLeft + child.getMeasuredWidth(),
+                    childBottom);
+            childLeft += (child.getMeasuredWidth() + layoutParams.rightMargin);
         }
     }
 

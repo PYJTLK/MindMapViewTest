@@ -42,7 +42,39 @@ public class DocumentLineDrawer extends DirectLineDrawer{
                 endY = (end.top + end.bottom)  /2;
                 onDrawLineRightToLeft(canvas,paint,startX,startY,endX,endY);
                 break;
+
+            case TreeLayout.DIRECTION_UP_TO_DOWN:
+                startX = (start.left + start.right) / 2;
+                endX = (end.left + end.right) / 2;
+                startY = start.bottom;
+                endY = end.top;
+                onDrawLineUpToDown(canvas,paint,startX,startY,endX,endY);
+                break;
+
+            case TreeLayout.DIRECTION_DOWN_TO_UP:
+                startX = (start.left + start.right) / 2;
+                endX = (end.left + end.right) / 2;
+                startY = start.top;
+                endY = end.bottom;
+                onDrawLineDownToUp(canvas,paint,startX,startY,endX,endY);
+                break;
         }
+    }
+
+    protected void onDrawLineUpToDown(Canvas canvas, Paint paint,int startX,int startY,int endX,int endY) {
+        canvas.drawLine(startX,startY,startX,startY + mLevelInterval / 2,paint);
+        canvas.drawLine(startX,startY + mLevelInterval / 2,endX,
+                startY + mLevelInterval / 2,paint);
+        canvas.drawLine(endX,startY + mLevelInterval / 2,endX,
+                endY,paint);
+    }
+
+    protected void onDrawLineDownToUp(Canvas canvas, Paint paint,int startX,int startY,int endX,int endY) {
+        canvas.drawLine(startX,startY,startX,startY - mLevelInterval / 2,paint);
+        canvas.drawLine(startX,startY - mLevelInterval / 2,endX,
+                startY - mLevelInterval / 2,paint);
+        canvas.drawLine(endX,startY - mLevelInterval / 2,endX,
+                endY,paint);
     }
 
     protected void onDrawLineLeftToRight(Canvas canvas, Paint paint,int startX,int startY,int endX,int endY){
