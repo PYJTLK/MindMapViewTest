@@ -6,17 +6,29 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
 public class TreeLayout extends ViewGroup {
-    public final static String TAG = "TAG_TreeLayout";
-
+    /**
+     * 树的方向：从左到右
+     */
     public static final int DIRECTION_LEFT_TO_RIGHT = 0;
+
+    /**
+     * 树的方向：从右到左
+     */
     public static final int DIRECTION_RIGHT_TO_LEFT = 1;
+
+    /**
+     * 树的方向：从上到下
+     */
     public static final int DIRECTION_UP_TO_DOWN = 2;
+
+    /**
+     * 树的方向：从下到上
+     */
     public static final int DIRECTION_DOWN_TO_UP = 3;
 
     private int mWrapWidth;
@@ -32,31 +44,31 @@ public class TreeLayout extends ViewGroup {
     private float mLastY;
     private boolean mMovePrepared;
 
+    /**
+     * TreeLayout专用的外间距参数类，用于记录布局参数
+     */
     public static class LayoutParams extends MarginLayoutParams{
         public LayoutParams(Context c, AttributeSet attrs) {
             super(c, attrs);
         }
-
-        public LayoutParams(int width, int height) {
-            super(width, height);
-        }
-
-        public LayoutParams(MarginLayoutParams source) {
-            super(source);
-        }
-
-        public LayoutParams(ViewGroup.LayoutParams source) {
-            super(source);
-        }
     }
 
-    private static class TreeViewException extends RuntimeException{
-        public TreeViewException(String message) {
-            super(message);
-        }
-    }
-
+    /**
+     * 连接线绘制类，TreeLayout通过这个类的子类来绘制父节点和子节点的连接线
+     */
     public static abstract class LineDrawer {
+        /**
+         * 绘制连接线
+         * @param canvas 绘制连接线的画布
+         * @param paint 绘制连接线的画笔
+         * @param start 连接线的起点控件的区域，即父结点控件所在区域
+         * @param end 连接线的终点控件的区域，即子结点控件所在区域
+         * @param direction 树的方向
+         *                  参考{@link #DIRECTION_LEFT_TO_RIGHT,
+         *                      @link #DIRECTION_RIGHT_TO_LEFT,
+         *                      @link #DIRECTION_UP_TO_DOWN,
+         *                      @link #DIRECTION_DOWN_TO_UP}
+         */
         protected abstract void onDrawLine(Canvas canvas, Paint paint, Rect start, Rect end, int direction);
     }
 
@@ -67,11 +79,6 @@ public class TreeLayout extends ViewGroup {
 
     public TreeLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        init(context,attrs);
-    }
-
-    public TreeLayout(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
-        super(context, attrs, defStyleAttr, defStyleRes);
         init(context,attrs);
     }
 
@@ -103,6 +110,11 @@ public class TreeLayout extends ViewGroup {
        }
     }
 
+    /**
+     * 测量水平方向树的尺寸
+     * @param widthMeasureSpec
+     * @param heightMeasureSpec
+     */
     protected void measureHorizontal(int widthMeasureSpec, int heightMeasureSpec){
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int widthMode = MeasureSpec.getMode(widthMeasureSpec);
@@ -123,7 +135,11 @@ public class TreeLayout extends ViewGroup {
         setMeasuredDimension(MeasureSpec.makeMeasureSpec(width,widthMode),MeasureSpec.makeMeasureSpec(height,heightMode));
     }
 
-    private int measureWrapContentHeightHorizontal(){
+    /**
+     * 测量水平树的默认高度
+     * @return wrap_content下的布局高度
+     */
+    protected int measureWrapContentHeightHorizontal(){
         int childCount = getChildCount();
 
         if(childCount <= 0){
@@ -148,7 +164,11 @@ public class TreeLayout extends ViewGroup {
         return Math.max(rootHeightNeed,childrenHeightNeeded);
     }
 
-    private int measureWrapContentWidthHorizontal(){
+    /**
+     * 测量水平树的默认宽度
+     * @return wrap_content下的布局宽度
+     */
+    protected int measureWrapContentWidthHorizontal(){
         int childCount = getChildCount();
 
         if(childCount <= 0){
@@ -160,7 +180,6 @@ public class TreeLayout extends ViewGroup {
 
         LayoutParams rootLayoutParams = (LayoutParams) root.getLayoutParams();
         wrapWidth += (rootLayoutParams.leftMargin + rootLayoutParams.rightMargin + root.getMeasuredWidth());
-        log("rootWidth:" + wrapWidth);
 
         if(childCount == 1){
             return wrapWidth;
@@ -184,6 +203,9 @@ public class TreeLayout extends ViewGroup {
         return wrapWidth;
     }
 
+    /**
+     * 测量竖直方向树的尺寸
+     */
     protected void measureVertical(int widthMeasureSpec, int heightMeasureSpec){
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int widthMode = MeasureSpec.getMode(widthMeasureSpec);
@@ -204,6 +226,10 @@ public class TreeLayout extends ViewGroup {
         setMeasuredDimension(MeasureSpec.makeMeasureSpec(width,widthMode),MeasureSpec.makeMeasureSpec(height,heightMode));
     }
 
+    /**
+     * 测量竖直方向树的默认宽度
+     * @return wrap_content下的布局宽度
+     */
     protected int measureWrapContentWidthVertical(){
         int childCount = getChildCount();
 
@@ -229,6 +255,10 @@ public class TreeLayout extends ViewGroup {
         return Math.max(rootWidthNeed,childrenWidthNeed);
     }
 
+    /**
+     * 测量竖直方向树的默认高度
+     * @return wrap_content下的布局高度
+     */
     protected int measureWrapContentHeightVertical(){
         int childCount = getChildCount();
 
@@ -285,6 +315,9 @@ public class TreeLayout extends ViewGroup {
         }
     }
 
+    /**
+     * 从上到下摆放子控件
+     */
     protected void onLayoutUpToDown(boolean changed, int l, int t, int r, int b){
         int childCount = getChildCount();
 
@@ -323,6 +356,9 @@ public class TreeLayout extends ViewGroup {
         }
     }
 
+    /**
+     * 从下到上摆放子控件
+     */
     protected void onLayoutDownToUp(boolean changed, int l, int t, int r, int b){
         int childCount = getChildCount();
 
@@ -361,6 +397,9 @@ public class TreeLayout extends ViewGroup {
         }
     }
 
+    /**
+     * 从左到右摆放子控件
+     */
     protected void onLayoutLeftToRight(boolean changed, int l, int t, int r, int b){
         int childCount = getChildCount();
 
@@ -399,6 +438,9 @@ public class TreeLayout extends ViewGroup {
         }
     }
 
+    /**
+     * 从右到左摆放子控件
+     */
     protected void onLayoutRightToLeft(boolean changed, int l, int t, int r, int b){
         int childCount = getChildCount();
 
@@ -437,10 +479,18 @@ public class TreeLayout extends ViewGroup {
         }
     }
 
+    /**
+     * 在此布局最上层绘制内容，绘制的内容会遮盖本布局及布局内控件
+     * @param canvas 绘制的画布
+     */
     protected void onDrawOnToppest(Canvas canvas){
         onDrawLine(canvas);
     }
 
+    /**
+     * 绘制结点的连接线
+     * @param canvas 绘制的画布
+     */
     protected void onDrawLine(Canvas canvas){
         View root = getChildAt(0);
         mStartRect.left = root.getLeft();
@@ -472,16 +522,28 @@ public class TreeLayout extends ViewGroup {
         onDrawOnToppest(canvas);
     }
 
+    /**
+     * 设置连接线绘制器
+     * @param lineDrawer 连接线绘制器
+     */
     public void setLineDrawer(LineDrawer lineDrawer){
         mLineDrawer = lineDrawer;
         requestLayout();
         invalidate();
     }
 
+    /**
+     * LevelInterval是指父结点与子节点的（水平或竖直）间距
+     * @return 间距值
+     */
     public int getLevelInterval() {
         return mLevelInterval;
     }
 
+    /**
+     * 设置父结点与子节点的（水平或竖直）间距，改变此间距值
+     * @param levelInterval 间距值
+     */
     public void setLevelInterval(int levelInterval) {
         this.mLevelInterval = levelInterval;
         requestLayout();
@@ -539,15 +601,19 @@ public class TreeLayout extends ViewGroup {
         return !mLocked;
     }
 
+    /**
+     * 本布局是否锁定，解锁状态下布局可以拖拽
+     * @return 是否锁定
+     */
     public boolean isLocked(){
        return mLocked;
     }
 
+    /**
+     * 锁定布局后无法拖拽
+     * @param lock 是否锁定
+     */
     public void lockTree(boolean lock){
         mLocked = lock;
-    }
-
-    private void log(String log){
-        Log.d(TAG,log);
     }
 }
