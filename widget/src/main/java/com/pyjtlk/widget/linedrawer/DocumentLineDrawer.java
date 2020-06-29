@@ -1,8 +1,7 @@
-package com.pyjtlk.mindmapviewtest;
+package com.pyjtlk.widget.linedrawer;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.graphics.Path;
 import android.graphics.Rect;
 
 import com.pyjtlk.widget.TreeLayout;

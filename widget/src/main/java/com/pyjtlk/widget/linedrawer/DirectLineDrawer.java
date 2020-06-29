@@ -1,4 +1,4 @@
-package com.pyjtlk.mindmapviewtest;
+package com.pyjtlk.widget.linedrawer;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;

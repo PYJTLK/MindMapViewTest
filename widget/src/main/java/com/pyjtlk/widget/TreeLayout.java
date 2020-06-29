@@ -7,11 +7,13 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
 public class TreeLayout extends ViewGroup {
     public final static String TAG = "TAG_TreeLayout";
+
     public static final int DIRECTION_LEFT_TO_RIGHT = 0;
     public static final int DIRECTION_RIGHT_TO_LEFT = 1;
     public static final int DIRECTION_UP_TO_DOWN = 2;
@@ -25,6 +27,10 @@ public class TreeLayout extends ViewGroup {
     private Rect mEndRect;
     private int mLevelInterval;
     private int mTreeDirection;
+    private boolean mLocked;
+    private float mLastX;
+    private float mLastY;
+    private boolean mMovePrepared;
 
     public static class LayoutParams extends MarginLayoutParams{
         public LayoutParams(Context c, AttributeSet attrs) {
@@ -73,6 +79,7 @@ public class TreeLayout extends ViewGroup {
         TypedArray typedArray = context.obtainStyledAttributes(attrs,R.styleable.TreeView);
         mTreeDirection = typedArray.getInt(R.styleable.TreeView_treeDirection,0);
         mLevelInterval = typedArray.getDimensionPixelSize(R.styleable.TreeView_levelInterval,0);
+        mLocked = typedArray.getBoolean(R.styleable.TreeView_locked,true);
         typedArray.recycle();
 
         mPaint = new Paint();
@@ -130,9 +137,12 @@ public class TreeLayout extends ViewGroup {
         int childrenHeightNeeded = 0;
 
         for(int i = 1;i < childCount;i++){
-            View view = getChildAt(i);
-            LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
-            childrenHeightNeeded += (layoutParams.topMargin + layoutParams.bottomMargin + view.getMeasuredHeight());
+            View child = getChildAt(i);
+            if(child.getVisibility() == View.GONE){
+                continue;
+            }
+            LayoutParams layoutParams = (LayoutParams) child.getLayoutParams();
+            childrenHeightNeeded += (layoutParams.topMargin + layoutParams.bottomMargin + child.getMeasuredHeight());
         }
 
         return Math.max(rootHeightNeed,childrenHeightNeeded);
@@ -159,9 +169,12 @@ public class TreeLayout extends ViewGroup {
         int maxWidth = 0;
 
         for(int i = 1;i < childCount;i++){
-            View view = getChildAt(i);
-            LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
-            int widthNeeded = layoutParams.leftMargin + layoutParams.rightMargin + view.getMeasuredWidth();
+            View child = getChildAt(i);
+            if(child.getVisibility() == View.GONE){
+                continue;
+            }
+            LayoutParams layoutParams = (LayoutParams) child.getLayoutParams();
+            int widthNeeded = layoutParams.leftMargin + layoutParams.rightMargin + child.getMeasuredWidth();
             maxWidth = Math.max(maxWidth,widthNeeded);
         }
 
@@ -205,9 +218,12 @@ public class TreeLayout extends ViewGroup {
         int childrenWidthNeed = 0;
 
         for(int i = 1;i < childCount;i++){
-            View view = getChildAt(i);
-            LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
-            childrenWidthNeed += (layoutParams.leftMargin + layoutParams.rightMargin + view.getMeasuredWidth());
+            View child = getChildAt(i);
+            if(child.getVisibility() == View.GONE){
+                continue;
+            }
+            LayoutParams layoutParams = (LayoutParams) child.getLayoutParams();
+            childrenWidthNeed += (layoutParams.leftMargin + layoutParams.rightMargin + child.getMeasuredWidth());
         }
 
         return Math.max(rootWidthNeed,childrenWidthNeed);
@@ -233,9 +249,12 @@ public class TreeLayout extends ViewGroup {
         int maxHeight = 0;
 
         for(int i = 1;i < childCount;i++){
-            View view = getChildAt(i);
-            LayoutParams layoutParams = (LayoutParams) view.getLayoutParams();
-            int heightNeeded = layoutParams.topMargin + layoutParams.bottomMargin + view.getMeasuredHeight();
+            View child = getChildAt(i);
+            if(child.getVisibility() == View.GONE){
+                continue;
+            }
+            LayoutParams layoutParams = (LayoutParams) child.getLayoutParams();
+            int heightNeeded = layoutParams.topMargin + layoutParams.bottomMargin + child.getMeasuredHeight();
             maxHeight = Math.max(maxHeight,heightNeeded);
         }
 
@@ -290,6 +309,9 @@ public class TreeLayout extends ViewGroup {
 
         for(int i = 1;i < childCount;i++){
             View child = getChildAt(i);
+            if(child.getVisibility() == View.GONE){
+                continue;
+            }
             LayoutParams layoutParams = (LayoutParams) child.getLayoutParams();
             childTop = childTopWithoutMargin + layoutParams.topMargin;
             childLeft += layoutParams.leftMargin;
@@ -325,6 +347,9 @@ public class TreeLayout extends ViewGroup {
 
         for(int i = 1;i < childCount;i++){
             View child = getChildAt(i);
+            if(child.getVisibility() == View.GONE){
+                continue;
+            }
             LayoutParams layoutParams = (LayoutParams) child.getLayoutParams();
             childBottom = childBottomWithoutMargin - layoutParams.bottomMargin;
             childLeft += layoutParams.leftMargin;
@@ -360,6 +385,9 @@ public class TreeLayout extends ViewGroup {
 
         for(int i = 1;i < childCount;i++){
             View child = getChildAt(i);
+            if(child.getVisibility() == View.GONE){
+                continue;
+            }
             LayoutParams layoutParams = (LayoutParams) child.getLayoutParams();
             childLeft = childLeftWithoutMargin + layoutParams.leftMargin;
             childTop += layoutParams.topMargin;
@@ -395,6 +423,9 @@ public class TreeLayout extends ViewGroup {
 
         for(int i = 1;i < childCount;i++){
             View child = getChildAt(i);
+            if(child.getVisibility() == View.GONE){
+                continue;
+            }
             LayoutParams layoutParams = (LayoutParams) child.getLayoutParams();
             childRight = childRightWithoutMargin - layoutParams.rightMargin;
             childTop += layoutParams.topMargin;
@@ -419,6 +450,9 @@ public class TreeLayout extends ViewGroup {
 
         for(int i = 1;i < getChildCount();i++){
             View child = getChildAt(i);
+            if(child.getVisibility() == View.GONE){
+                continue;
+            }
             mEndRect.left = child.getLeft();
             mEndRect.right = child.getRight();
             mEndRect.top = child.getTop();
@@ -452,6 +486,65 @@ public class TreeLayout extends ViewGroup {
         this.mLevelInterval = levelInterval;
         requestLayout();
         invalidate();
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        int action = event.getAction();
+        float currentX = event.getRawX();
+        float currentY = event.getRawY();
+        float deltaX;
+        float deltaY;
+
+        switch(action){
+            case MotionEvent.ACTION_DOWN:
+                return true;
+
+            case MotionEvent.ACTION_MOVE:
+                if(mLocked){
+                    return false;
+                }
+
+                if(!mMovePrepared){
+                    mMovePrepared = true;
+                    mLastX = currentX;
+                    mLastY = currentY;
+                }
+
+                deltaX = currentX - mLastX;
+                deltaY = currentY - mLastY;
+
+                scrollBy((int)-deltaX,(int)-deltaY);
+
+                mLastX = currentX;
+                mLastY = currentY;
+                break;
+
+            case MotionEvent.ACTION_UP:
+            case MotionEvent.ACTION_CANCEL:
+                mMovePrepared = false;
+                break;
+        }
+        return super.onTouchEvent(event);
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent event) {
+        int action = event.getAction();
+
+        if(action == MotionEvent.ACTION_DOWN){
+            return super.onInterceptTouchEvent(event);
+        }
+
+        return !mLocked;
+    }
+
+    public boolean isLocked(){
+       return mLocked;
+    }
+
+    public void lockTree(boolean lock){
+        mLocked = lock;
     }
 
     private void log(String log){

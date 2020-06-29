@@ -8,5 +8,6 @@
             <enum name="upToDown" value="2"/>
             <enum name="downToUp" value="3"/>
         </attr>
+        <attr name="locked" format="boolean"/>
     </declare-styleable>
 </resources>

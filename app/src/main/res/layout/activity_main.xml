@@ -8,12 +8,18 @@
     tools:context=".MainActivity"
     android:orientation="vertical">
 
+    <Button
+        android:id="@+id/button"
+        android:layout_width="100dp"
+        android:layout_height="50dp"
+        android:onClick="oncliked"/>
+
     <com.pyjtlk.widget.TreeLayout
         android:id="@+id/treeView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="#A00"
-        app:treeDirection="downToUp"
+        app:treeDirection="leftToRight"
         app:levelInterval="50dp">
 
         <View
@@ -38,7 +44,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="#A00"
-            app:treeDirection="downToUp"
+            app:treeDirection="leftToRight"
             app:levelInterval="50dp">
 
             <View
