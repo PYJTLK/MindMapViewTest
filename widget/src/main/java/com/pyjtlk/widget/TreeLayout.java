@@ -58,7 +58,7 @@ public class TreeLayout extends ViewGroup {
      */
     public static abstract class LineDrawer {
         /**
-         * 绘制连接线
+         * 连接线绘制器抽象类
          * @param canvas 绘制连接线的画布
          * @param paint 绘制连接线的画笔
          * @param start 连接线的起点控件的区域，即父结点控件所在区域
@@ -99,9 +99,6 @@ public class TreeLayout extends ViewGroup {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         measureChildren(widthMeasureSpec,heightMeasureSpec);
-
-        mWrapWidth = measureWrapContentWidthHorizontal();
-        mWrapHeight = measureWrapContentHeightHorizontal();
 
        if(mTreeDirection == DIRECTION_LEFT_TO_RIGHT || mTreeDirection == DIRECTION_RIGHT_TO_LEFT){
            measureHorizontal(widthMeasureSpec,heightMeasureSpec);
@@ -480,18 +477,10 @@ public class TreeLayout extends ViewGroup {
     }
 
     /**
-     * 在此布局最上层绘制内容，绘制的内容会遮盖本布局及布局内控件
-     * @param canvas 绘制的画布
-     */
-    protected void onDrawOnToppest(Canvas canvas){
-        onDrawLine(canvas);
-    }
-
-    /**
      * 绘制结点的连接线
      * @param canvas 绘制的画布
      */
-    protected void onDrawLine(Canvas canvas){
+    protected void onDrawConnectLine(Canvas canvas){
         View root = getChildAt(0);
         mStartRect.left = root.getLeft();
         mStartRect.right = root.getRight();
@@ -512,14 +501,14 @@ public class TreeLayout extends ViewGroup {
     }
 
     @Override
-    public ViewGroup.LayoutParams generateLayoutParams(AttributeSet attrs) {
-        return new LayoutParams(getContext(),attrs);
+    protected void dispatchDraw(Canvas canvas) {
+        super.dispatchDraw(canvas);
+        onDrawConnectLine(canvas);
     }
 
     @Override
-    public void draw(Canvas canvas) {
-        super.draw(canvas);
-        onDrawOnToppest(canvas);
+    public ViewGroup.LayoutParams generateLayoutParams(AttributeSet attrs) {
+        return new LayoutParams(getContext(),attrs);
     }
 
     /**

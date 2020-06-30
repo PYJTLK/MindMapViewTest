@@ -6,9 +6,9 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-
 import com.pyjtlk.widget.TreeLayout;
-import com.pyjtlk.widget.linedrawer.DocumentLineDrawer;
+import com.pyjtlk.widget.linedrawer.DirectLineDrawer;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -27,11 +27,11 @@ public class MainActivity extends AppCompatActivity {
         button = findViewById(R.id.button);
 
         treeView = findViewById(R.id.treeView);
-        treeView.setLineDrawer(new DocumentLineDrawer(6,treeView.getLevelInterval(),Color.WHITE));
+        treeView.setLineDrawer(new DirectLineDrawer(6,Color.WHITE));
 
 
         treeView1 = findViewById(R.id.treeView1);
-        treeView1.setLineDrawer(new DocumentLineDrawer(6,treeView.getLevelInterval(),Color.WHITE));
+        treeView1.setLineDrawer(new DirectLineDrawer(6,Color.WHITE));
 
         /*
         treeView2 = findViewById(R.id.treeView2);

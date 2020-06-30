@@ -12,6 +12,7 @@
         android:id="@+id/button"
         android:layout_width="100dp"
         android:layout_height="50dp"
+        android:text="LOCKED"
         android:onClick="oncliked"/>
 
     <com.pyjtlk.widget.TreeLayout
