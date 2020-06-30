@@ -30,8 +30,8 @@ public class MainActivity extends AppCompatActivity {
         treeView.setLineDrawer(new DirectLineDrawer(6,Color.WHITE));
 
 
-        treeView1 = findViewById(R.id.treeView1);
-        treeView1.setLineDrawer(new DirectLineDrawer(6,Color.WHITE));
+        //treeView1 = findViewById(R.id.treeView1);
+        //treeView1.setLineDrawer(new DirectLineDrawer(6,Color.WHITE));
 
         /*
         treeView2 = findViewById(R.id.treeView2);

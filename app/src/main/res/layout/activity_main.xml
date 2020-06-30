@@ -21,7 +21,8 @@
         android:layout_height="wrap_content"
         android:background="#A00"
         app:treeDirection="leftToRight"
-        app:branch="2"
+        app:branch="3"
+        android:padding="10dp"
         app:levelInterval="50dp">
 
         <View
@@ -33,60 +34,20 @@
             android:layout_width="40dp"
             android:layout_height="40dp"
             android:background="#A0A0"
-            android:layout_margin="10dp"/>
+            android:layout_marginBottom="10dp"/>
 
-        <ScrollView
-            android:layout_width="100dp"
-            android:layout_height="200dp">
+        <View
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="#AAA0"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"/>
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <View
-                    android:layout_width="200dp"
-                    android:layout_height="200dp"
-                    android:background="#A0A"/>
-
-                <View
-                    android:layout_width="200dp"
-                    android:layout_height="200dp"
-                    android:background="#A0A0"
-                    android:layout_margin="10dp"/>
-            </LinearLayout>
-        </ScrollView>
-
-        <com.pyjtlk.widget.TreeLayout
-            android:id="@+id/treeView1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="#A00"
-            app:treeDirection="leftToRight"
-            app:levelInterval="50dp">
-
-            <View
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="#A0A"/>
-
-            <View
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="#A0A0"
-                android:layout_margin="10dp"/>
-
-            <View
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="#A00A"
-                android:layout_margin="10dp"/>
-
-            <View
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="#A0A0"
-                android:layout_margin="10dp"/>
-        </com.pyjtlk.widget.TreeLayout>
+        <View
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="#A0A0"
+            android:layout_marginTop="10dp"/>
     </com.pyjtlk.widget.TreeLayout>
+
 </LinearLayout>

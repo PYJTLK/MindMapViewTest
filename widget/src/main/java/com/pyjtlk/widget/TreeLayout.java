@@ -3,6 +3,7 @@ package com.pyjtlk.widget;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
@@ -46,6 +47,7 @@ public class TreeLayout extends ViewGroup {
     private float mLastY;
     private boolean mMovePrepared;
     private int mMaxBranch;
+    private Rect mPaddingClipRect;
 
     /**
      * TreeLayout专用的外间距参数类，用于记录布局参数
@@ -104,6 +106,7 @@ public class TreeLayout extends ViewGroup {
 
         mStartRect = new Rect();
         mEndRect = new Rect();
+        mPaddingClipRect = new Rect();
     }
 
     @Override
@@ -493,6 +496,23 @@ public class TreeLayout extends ViewGroup {
      * @param canvas 绘制的画布
      */
     protected void onDrawConnectLine(Canvas canvas){
+        canvas.save();
+
+        int paddingLeft = getPaddingLeft();
+        int paddingRight = getPaddingRight();
+        int paddingTop = getPaddingTop();
+        int paddingBottom = getPaddingBottom();
+
+        int scrollX = getScrollX();
+        int scrollY = getScrollY();
+
+        mPaddingClipRect.left = scrollX + paddingLeft;
+        mPaddingClipRect.top = scrollY + paddingTop;
+        mPaddingClipRect.right = scrollX + getWidth() - paddingRight;
+        mPaddingClipRect.bottom = scrollY + getHeight() - paddingBottom;
+
+        canvas.clipRect(mPaddingClipRect);
+
         View root = getChildAt(0);
         mStartRect.left = root.getLeft();
         mStartRect.right = root.getRight();
@@ -510,6 +530,8 @@ public class TreeLayout extends ViewGroup {
             mEndRect.bottom = child.getBottom();
             mLineDrawer.onDrawLine(canvas,mPaint,mStartRect,mEndRect,mTreeDirection);
         }
+
+        canvas.restore();
     }
 
     @Override
