@@ -542,8 +542,8 @@ public class TreeLayout extends ViewGroup {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         int action = event.getAction();
-        float currentX = event.getRawX();
-        float currentY = event.getRawY();
+        float currentX = event.getX();
+        float currentY = event.getY();
         float deltaX;
         float deltaY;
 
@@ -552,9 +552,12 @@ public class TreeLayout extends ViewGroup {
                 return true;
 
             case MotionEvent.ACTION_MOVE:
+                /*
                 if(mLocked){
                     return false;
                 }
+
+                 */
 
                 if(!mMovePrepared){
                     mMovePrepared = true;

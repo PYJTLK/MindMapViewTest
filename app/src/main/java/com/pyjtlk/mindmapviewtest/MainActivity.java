@@ -43,8 +43,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void oncliked(View view) {
-        //treeView.lockTree(!treeView.isLocked());
-        //button.setText(treeView.isLocked() ? "locked" : "unlocked");
-        treeView1.setVisibility(treeView1.getVisibility() == View.GONE ? View.VISIBLE : View.GONE);
+        treeView.lockTree(!treeView.isLocked());
+        button.setText(treeView.isLocked() ? "locked" : "unlocked");
+        //treeView1.setVisibility(treeView1.getVisibility() == View.GONE ? View.VISIBLE : View.GONE);
     }
 }
