@@ -9,5 +9,6 @@
             <enum name="downToUp" value="3"/>
         </attr>
         <attr name="locked" format="boolean"/>
+        <attr name="branch" format="integer"/>
     </declare-styleable>
 </resources>

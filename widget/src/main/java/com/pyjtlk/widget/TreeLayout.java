@@ -31,6 +31,8 @@ public class TreeLayout extends ViewGroup {
      */
     public static final int DIRECTION_DOWN_TO_UP = 3;
 
+    private static final int BRENCH_INFINATE = -1;
+
     private int mWrapWidth;
     private int mWrapHeight;
     private LineDrawer mLineDrawer;
@@ -43,6 +45,7 @@ public class TreeLayout extends ViewGroup {
     private float mLastX;
     private float mLastY;
     private boolean mMovePrepared;
+    private int mMaxBranch;
 
     /**
      * TreeLayout专用的外间距参数类，用于记录布局参数
@@ -72,6 +75,12 @@ public class TreeLayout extends ViewGroup {
         protected abstract void onDrawLine(Canvas canvas, Paint paint, Rect start, Rect end, int direction);
     }
 
+    private static class TreeException extends RuntimeException{
+        public TreeException(String message) {
+            super(message);
+        }
+    }
+
     public TreeLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
         init(context,attrs);
@@ -87,6 +96,7 @@ public class TreeLayout extends ViewGroup {
         mTreeDirection = typedArray.getInt(R.styleable.TreeView_treeDirection,0);
         mLevelInterval = typedArray.getDimensionPixelSize(R.styleable.TreeView_levelInterval,0);
         mLocked = typedArray.getBoolean(R.styleable.TreeView_locked,true);
+        mMaxBranch = typedArray.getInt(R.styleable.TreeView_branch,BRENCH_INFINATE);
         typedArray.recycle();
 
         mPaint = new Paint();
@@ -98,6 +108,8 @@ public class TreeLayout extends ViewGroup {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        checkBranch();
+
         measureChildren(widthMeasureSpec,heightMeasureSpec);
 
        if(mTreeDirection == DIRECTION_LEFT_TO_RIGHT || mTreeDirection == DIRECTION_RIGHT_TO_LEFT){
@@ -511,6 +523,18 @@ public class TreeLayout extends ViewGroup {
         return new LayoutParams(getContext(),attrs);
     }
 
+    private void checkBranch(){
+        if(mMaxBranch == BRENCH_INFINATE){
+            return;
+        }
+
+        int branchCount = getChildCount() - 1;
+
+        if(branchCount > mMaxBranch){
+            throw new TreeException("this is a " + mMaxBranch + " fork tree,however it's count of branch is " + branchCount);
+        }
+    }
+
     /**
      * 设置连接线绘制器
      * @param lineDrawer 连接线绘制器
@@ -552,12 +576,9 @@ public class TreeLayout extends ViewGroup {
                 return true;
 
             case MotionEvent.ACTION_MOVE:
-                /*
                 if(mLocked){
                     return false;
                 }
-
-                 */
 
                 if(!mMovePrepared){
                     mMovePrepared = true;
