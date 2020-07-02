@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import com.pyjtlk.widget.TreeLayout;
-import com.pyjtlk.widget.linedrawer.DirectLineDrawer;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -27,18 +26,27 @@ public class MainActivity extends AppCompatActivity {
         button = findViewById(R.id.button);
 
         treeView = findViewById(R.id.treeView);
-        treeView.setLineDrawer(new DirectLineDrawer(6,Color.WHITE));
+
+        /*
+        DocumentLineDrawer documentLineDrawer = new DocumentLineDrawer(6,treeView.getLevelInterval(),Color.WHITE);
+        RectFrameDrawer rectFrameDrawer = new RectFrameDrawer(documentLineDrawer,6,Color.WHITE);
+        ConnectPointDrawer connectPointDrawer = new ConnectPointDrawer(rectFrameDrawer,6,Color.WHITE);
+
+         */
+        ClassicDecoratorFactory factory = new ClassicDecoratorFactory(6,12,treeView.getLevelInterval(),Color.WHITE);
+
+        treeView.setDecorDrawer(factory.createDecorator());
 
 
-        //treeView1 = findViewById(R.id.treeView1);
-        //treeView1.setLineDrawer(new DirectLineDrawer(6,Color.WHITE));
+        treeView1 = findViewById(R.id.treeView1);
+        treeView1.setDecorDrawer(factory.createDecorator());
 
         /*
         treeView2 = findViewById(R.id.treeView2);
-        treeView2.setLineDrawer(new DocumentLineDrawer(6,treeView.getLevelInterval(),Color.WHITE));
+        treeView2.setDecorDrawer(new DocumentLineDrawer(6,treeView.getLevelInterval(),Color.WHITE));
 
         treeView3 = findViewById(R.id.treeView3);
-        treeView3.setLineDrawer(new DocumentLineDrawer(6,treeView.getLevelInterval(),Color.WHITE));
+        treeView3.setDecorDrawer(new DocumentLineDrawer(6,treeView.getLevelInterval(),Color.WHITE));
          */
     }
 
@@ -46,5 +54,6 @@ public class MainActivity extends AppCompatActivity {
         treeView.lockTree(!treeView.isLocked());
         button.setText(treeView.isLocked() ? "locked" : "unlocked");
         //treeView1.setVisibility(treeView1.getVisibility() == View.GONE ? View.VISIBLE : View.GONE);
+        //treeView.scaleContent(0.5f);
     }
 }

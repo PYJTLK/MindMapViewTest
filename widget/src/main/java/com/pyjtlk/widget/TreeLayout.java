@@ -3,7 +3,6 @@ package com.pyjtlk.widget;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
@@ -36,7 +35,7 @@ public class TreeLayout extends ViewGroup {
 
     private int mWrapWidth;
     private int mWrapHeight;
-    private LineDrawer mLineDrawer;
+    private NodeDecoratorDrawer mDecoratorDrawer;
     private Paint mPaint;
     private Rect mStartRect;
     private Rect mEndRect;
@@ -48,6 +47,8 @@ public class TreeLayout extends ViewGroup {
     private boolean mMovePrepared;
     private int mMaxBranch;
     private Rect mPaddingClipRect;
+    private float mContentScaleX;
+    private float mContentScaleY;
 
     /**
      * TreeLayout专用的外间距参数类，用于记录布局参数
@@ -56,25 +57,67 @@ public class TreeLayout extends ViewGroup {
         public LayoutParams(Context c, AttributeSet attrs) {
             super(c, attrs);
         }
+
+        public LayoutParams(ViewGroup.LayoutParams source) {
+            super(source);
+        }
     }
 
     /**
-     * 连接线绘制类，TreeLayout通过这个类的子类来绘制父节点和子节点的连接线
+     * 点缀绘制器，TreeLayout通过这个类的子类来绘制点缀内容
      */
-    public static abstract class LineDrawer {
+    public static abstract class NodeDecoratorDrawer {
+        private NodeDecoratorDrawer mSourceDector;
+
+        public NodeDecoratorDrawer(NodeDecoratorDrawer sourceDector){
+            mSourceDector = sourceDector;
+        }
+
         /**
-         * 连接线绘制器抽象类
-         * @param canvas 绘制连接线的画布
-         * @param paint 绘制连接线的画笔
-         * @param start 连接线的起点控件的区域，即父结点控件所在区域
-         * @param end 连接线的终点控件的区域，即子结点控件所在区域
+         * 绘制自身树布局的点缀
+         * @param canvas 绘制点缀的画布
+         * @param paint 绘制点缀的画笔
+         * @param start 点缀的起点控件的区域，即父结点控件所在区域
+         * @param end 点缀的终点控件的区域，即子结点控件所在区域
          * @param direction 树的方向
          *                  参考{@link #DIRECTION_LEFT_TO_RIGHT,
-         *                      @link #DIRECTION_RIGHT_TO_LEFT,
-         *                      @link #DIRECTION_UP_TO_DOWN,
-         *                      @link #DIRECTION_DOWN_TO_UP}
+         *                       @link #DIRECTION_RIGHT_TO_LEFT,
+         *                       @link #DIRECTION_UP_TO_DOWN,
+         *                       @link #DIRECTION_DOWN_TO_UP}
          */
-        protected abstract void onDrawLine(Canvas canvas, Paint paint, Rect start, Rect end, int direction);
+        protected abstract void onDrawDecorator(Canvas canvas, Paint paint, Rect start, Rect end, int direction);
+
+        /**
+         * 绘制自身树布局的点缀
+         * @param canvas 绘制点缀的画布
+         * @param paint 绘制点缀的画笔
+         * @param start 点缀的起点控件的区域，即父结点控件所在区域
+         * @param end 点缀的终点控件的区域，即子结点控件所在区域
+         * @param startView 点缀的起点控件
+         * @param endView 点缀的终点控件
+         * @param direction 树的方向
+         */
+        public void drawDecorator(Canvas canvas, Paint paint, Rect start, Rect end,View startView,View endView,int direction){
+            if(mSourceDector != null){
+                mSourceDector.drawDecorator(canvas,paint,start,end,startView,endView,direction);
+            }
+
+            if(skipThisDraw(startView,endView)){
+                return;
+            }
+
+            onDrawDecorator(canvas,paint,start,end,direction);
+        }
+
+        /**
+         * 跳过本树布局的点缀绘制
+         * @param startView 点缀的起点控件
+         * @param endView 点缀的终点控件
+         * @return 是否跳过本树布局的点缀绘制
+         */
+        public boolean skipThisDraw(View startView,View endView){
+            return false;
+        }
     }
 
     private static class TreeException extends RuntimeException{
@@ -107,6 +150,9 @@ public class TreeLayout extends ViewGroup {
         mStartRect = new Rect();
         mEndRect = new Rect();
         mPaddingClipRect = new Rect();
+
+        mContentScaleX = 1f;
+        mContentScaleY = 1f;
     }
 
     @Override
@@ -492,10 +538,14 @@ public class TreeLayout extends ViewGroup {
     }
 
     /**
-     * 绘制结点的连接线
+     * 绘制结点的装饰
      * @param canvas 绘制的画布
      */
-    protected void onDrawConnectLine(Canvas canvas){
+    protected void onDrawDecorator(Canvas canvas){
+        if(mDecoratorDrawer == null){
+            return;
+        }
+
         canvas.save();
 
         int paddingLeft = getPaddingLeft();
@@ -528,7 +578,7 @@ public class TreeLayout extends ViewGroup {
             mEndRect.right = child.getRight();
             mEndRect.top = child.getTop();
             mEndRect.bottom = child.getBottom();
-            mLineDrawer.onDrawLine(canvas,mPaint,mStartRect,mEndRect,mTreeDirection);
+            mDecoratorDrawer.drawDecorator(canvas,mPaint,mStartRect,mEndRect,root,child,mTreeDirection);
         }
 
         canvas.restore();
@@ -537,7 +587,7 @@ public class TreeLayout extends ViewGroup {
     @Override
     protected void dispatchDraw(Canvas canvas) {
         super.dispatchDraw(canvas);
-        onDrawConnectLine(canvas);
+        onDrawDecorator(canvas);
     }
 
     @Override
@@ -558,11 +608,11 @@ public class TreeLayout extends ViewGroup {
     }
 
     /**
-     * 设置连接线绘制器
-     * @param lineDrawer 连接线绘制器
+     * 设置点缀绘制器
+     * @param decortator 点缀绘制器
      */
-    public void setLineDrawer(LineDrawer lineDrawer){
-        mLineDrawer = lineDrawer;
+    public void setDecorDrawer(NodeDecoratorDrawer decortator){
+        mDecoratorDrawer = decortator;
         requestLayout();
         invalidate();
     }
@@ -650,5 +700,70 @@ public class TreeLayout extends ViewGroup {
      */
     public void lockTree(boolean lock){
         mLocked = lock;
+    }
+
+    public void scaleContent(float scale){
+        scaleContentX(scale);
+        scaleContentY(scale);
+    }
+
+    public void scaleContentX(float scaleX){
+        scaleChildrenX(scaleX);
+    }
+
+    private void scaleChildrenX(float scaleX){
+        mContentScaleX = scaleX;
+
+        if(isTreeHorizontal()){
+            mLevelInterval *= scaleX;
+        }
+
+        for(int i = 0;i < getChildCount();i++){
+            View child = getChildAt(i);
+            LayoutParams oldLayoutParams = (LayoutParams) child.getLayoutParams();
+            LayoutParams newLayoutParams = new LayoutParams(oldLayoutParams);
+            newLayoutParams.leftMargin = (int) (scaleX * oldLayoutParams.leftMargin);
+            newLayoutParams.rightMargin = (int) (scaleX * oldLayoutParams.rightMargin);
+            newLayoutParams.topMargin = oldLayoutParams.topMargin;
+            newLayoutParams.bottomMargin = oldLayoutParams.bottomMargin;
+            newLayoutParams.width *= scaleX;
+            child.setLayoutParams(newLayoutParams);
+        }
+    }
+
+    public void scaleContentY(float scaleY){
+        scaleChildrenY(scaleY);
+    }
+
+    private void scaleChildrenY(float scaleY){
+        mContentScaleY = scaleY;
+
+        if(isTreeVertical()){
+            mLevelInterval *= scaleY;
+        }
+
+        for(int i = 0;i < getChildCount();i++){
+            View child = getChildAt(i);
+            LayoutParams oldLayoutParams = (LayoutParams) child.getLayoutParams();
+            LayoutParams newLayoutParams = new LayoutParams(oldLayoutParams);
+            newLayoutParams.leftMargin = oldLayoutParams.leftMargin;
+            newLayoutParams.rightMargin = oldLayoutParams.rightMargin;
+            newLayoutParams.topMargin = (int) (scaleY * oldLayoutParams.topMargin);
+            newLayoutParams.bottomMargin = (int) (scaleY * oldLayoutParams.bottomMargin);
+            newLayoutParams.height *= scaleY;
+            child.setLayoutParams(newLayoutParams);
+        }
+    }
+
+    public boolean isTreeHorizontal(){
+        return getTreeDirection() == DIRECTION_RIGHT_TO_LEFT || mTreeDirection == DIRECTION_LEFT_TO_RIGHT;
+    }
+
+    public boolean isTreeVertical(){
+        return !isTreeHorizontal();
+    }
+
+    public int getTreeDirection(){
+        return mTreeDirection;
     }
 }

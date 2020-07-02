@@ -8,6 +8,10 @@ import com.pyjtlk.widget.TreeLayout;
 
 public class DocumentLineDrawer extends DirectLineDrawer{
     private int mLevelInterval;
+    private int mStartX;
+    private int mStartY ;
+    private int mEndX;
+    private int mEndY;
 
     public DocumentLineDrawer(int lineWidth,int levelInterval,int color) {
         super(lineWidth, color);
@@ -15,47 +19,43 @@ public class DocumentLineDrawer extends DirectLineDrawer{
     }
 
     @Override
-    protected void onDrawLine(Canvas canvas, Paint paint, Rect start, Rect end, int direction) {
-        int startX = 0;
-        int startY = 0;
-        int endX = 0;
-        int endY = 0;
-
+    protected void onDrawDecorator(Canvas canvas, Paint paint, Rect start, Rect end, int direction) {
         paint.setColor(getColor());
+        paint.setStyle(Paint.Style.FILL);
         paint.setStrokeCap(Paint.Cap.ROUND);
         paint.setStrokeWidth(getLineWidth());
 
         switch(direction){
             case TreeLayout.DIRECTION_LEFT_TO_RIGHT:
-                startX = start.right;
-                endX = end.left;
-                startY = (start.top + start.bottom) / 2;
-                endY = (end.top + end.bottom)  /2;
-                onDrawLineLeftToRight(canvas,paint,startX,startY,endX,endY);
+                mStartX = start.right;
+                mEndX = end.left;
+                mStartY = (start.top + start.bottom) / 2;
+                mEndY = (end.top + end.bottom)  /2;
+                onDrawLineLeftToRight(canvas,paint,mStartX,mStartY,mEndX,mEndY);
                 break;
 
             case TreeLayout.DIRECTION_RIGHT_TO_LEFT:
-                startX = start.left;
-                endX = end.right;
-                startY = (start.top + start.bottom) / 2;
-                endY = (end.top + end.bottom)  /2;
-                onDrawLineRightToLeft(canvas,paint,startX,startY,endX,endY);
+                mStartX = start.left;
+                mEndX = end.right;
+                mStartY = (start.top + start.bottom) / 2;
+                mEndY = (end.top + end.bottom)  /2;
+                onDrawLineRightToLeft(canvas,paint,mStartX,mStartY,mEndX,mEndY);
                 break;
 
             case TreeLayout.DIRECTION_UP_TO_DOWN:
-                startX = (start.left + start.right) / 2;
-                endX = (end.left + end.right) / 2;
-                startY = start.bottom;
-                endY = end.top;
-                onDrawLineUpToDown(canvas,paint,startX,startY,endX,endY);
+                mStartX = (start.left + start.right) / 2;
+                mEndX = (end.left + end.right) / 2;
+                mStartY = start.bottom;
+                mEndY = end.top;
+                onDrawLineUpToDown(canvas,paint,mStartX,mStartY,mEndX,mEndY);
                 break;
 
             case TreeLayout.DIRECTION_DOWN_TO_UP:
-                startX = (start.left + start.right) / 2;
-                endX = (end.left + end.right) / 2;
-                startY = start.top;
-                endY = end.bottom;
-                onDrawLineDownToUp(canvas,paint,startX,startY,endX,endY);
+                mStartX = (start.left + start.right) / 2;
+                mEndX = (end.left + end.right) / 2;
+                mStartY = start.top;
+                mEndY = end.bottom;
+                onDrawLineDownToUp(canvas,paint,mStartX,mStartY,mEndX,mEndY);
                 break;
         }
     }

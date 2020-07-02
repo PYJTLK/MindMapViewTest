@@ -6,21 +6,21 @@ import android.graphics.Rect;
 
 import com.pyjtlk.widget.TreeLayout;
 
-public class DirectLineDrawer extends TreeLayout.NodeDecoratorDrawer {
-    private int mLineWidth;
+public class ConnectPointDrawer extends TreeLayout.NodeDecoratorDrawer {
+    private int mPointRadius;
     private int mColor;
     private int mStartX;
     private int mStartY ;
     private int mEndX;
     private int mEndY;
 
-    public DirectLineDrawer(int lineWidth, int color){
-        this(null,lineWidth,color);
+    public ConnectPointDrawer(int pointRadius,int color){
+        this(null,pointRadius,color);
     }
 
-    public DirectLineDrawer(TreeLayout.NodeDecoratorDrawer sourceDecorator, int lineWidth, int color){
-        super(sourceDecorator);
-        mLineWidth = lineWidth;
+    public ConnectPointDrawer(TreeLayout.NodeDecoratorDrawer sourceDector, int pointRadius, int color) {
+        super(sourceDector);
+        mPointRadius = pointRadius;
         mColor = color;
     }
 
@@ -56,19 +56,18 @@ public class DirectLineDrawer extends TreeLayout.NodeDecoratorDrawer {
                 break;
         }
 
-        paint.setColor(mColor);
         paint.setStyle(Paint.Style.FILL);
-        paint.setStrokeCap(Paint.Cap.ROUND);
-        paint.setStrokeWidth(mLineWidth);
-        canvas.drawLine(mStartX,mStartY,mEndX,mEndY,paint);
+        paint.setColor(mColor);
+        canvas.drawCircle(mStartX,mStartY,mPointRadius,paint);
+        canvas.drawCircle(mEndX,mEndY,mPointRadius,paint);
     }
 
-    public int getLineWidth() {
-        return mLineWidth;
+    public int getPointRadius() {
+        return mPointRadius;
     }
 
-    public void setLineWidth(int lineWidth) {
-        this.mLineWidth = lineWidth;
+    public void setPointRadius(int radius) {
+        mPointRadius = radius;
     }
 
     public int getColor() {

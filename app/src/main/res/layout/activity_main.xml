@@ -17,12 +17,11 @@
 
     <com.pyjtlk.widget.TreeLayout
         android:id="@+id/treeView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="300dp"
+        android:layout_height="300dp"
         android:background="#A00"
         app:treeDirection="leftToRight"
         app:branch="3"
-        android:padding="10dp"
         app:levelInterval="50dp">
 
         <View
@@ -43,11 +42,39 @@
             android:layout_marginTop="10dp"
             android:layout_marginBottom="10dp"/>
 
-        <View
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="#A0A0"
-            android:layout_marginTop="10dp"/>
+        <com.pyjtlk.widget.TreeLayout
+            android:id="@+id/treeView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="#A00"
+            app:treeDirection="leftToRight"
+            app:branch="3"
+            app:levelInterval="50dp">
+
+            <View
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="#A0A"/>
+
+            <View
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="#A0A0"
+                android:layout_marginBottom="10dp"/>
+
+            <View
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="#AAA0"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"/>
+
+            <View
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="#A0A0"
+                android:layout_marginTop="10dp"/>
+        </com.pyjtlk.widget.TreeLayout>
     </com.pyjtlk.widget.TreeLayout>
 
 </LinearLayout>
