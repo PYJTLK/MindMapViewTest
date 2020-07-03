@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <declare-styleable name="TreeView">
+    <declare-styleable name="TreeLayout">
         <attr name="levelInterval" format="dimension"/>
         <attr name="treeDirection" format="enum">
             <enum name="leftToRight" value="0"/>

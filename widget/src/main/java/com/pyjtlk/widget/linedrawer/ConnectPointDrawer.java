@@ -4,9 +4,10 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
 
-import com.pyjtlk.widget.TreeLayout;
+import com.pyjtlk.widget.Direction;
+import com.pyjtlk.widget.NodeDecoratorDrawer;
 
-public class ConnectPointDrawer extends TreeLayout.NodeDecoratorDrawer {
+public class ConnectPointDrawer extends NodeDecoratorDrawer {
     private int mPointRadius;
     private int mColor;
     private int mStartX;
@@ -18,7 +19,7 @@ public class ConnectPointDrawer extends TreeLayout.NodeDecoratorDrawer {
         this(null,pointRadius,color);
     }
 
-    public ConnectPointDrawer(TreeLayout.NodeDecoratorDrawer sourceDector, int pointRadius, int color) {
+    public ConnectPointDrawer(NodeDecoratorDrawer sourceDector, int pointRadius, int color) {
         super(sourceDector);
         mPointRadius = pointRadius;
         mColor = color;
@@ -27,28 +28,28 @@ public class ConnectPointDrawer extends TreeLayout.NodeDecoratorDrawer {
     @Override
     protected void onDrawDecorator(Canvas canvas, Paint paint, Rect start, Rect end, int direction) {
         switch(direction){
-            case TreeLayout.DIRECTION_LEFT_TO_RIGHT:
+            case Direction.DIRECTION_LEFT_TO_RIGHT:
                 mStartX = start.right;
                 mEndX = end.left;
                 mStartY = (start.top + start.bottom) / 2;
                 mEndY = (end.top + end.bottom)  /2;
                 break;
 
-            case TreeLayout.DIRECTION_RIGHT_TO_LEFT:
+            case Direction.DIRECTION_RIGHT_TO_LEFT:
                 mStartX = start.left;
                 mEndX = end.right;
                 mStartY = (start.top + start.bottom) / 2;
                 mEndY = (end.top + end.bottom)  /2;
                 break;
 
-            case TreeLayout.DIRECTION_UP_TO_DOWN:
+            case Direction.DIRECTION_UP_TO_DOWN:
                 mStartX = (start.right + start.left) / 2;
                 mEndX = (end.right + end.left) / 2;
                 mStartY = start.bottom;
                 mEndY = end.top;
                 break;
 
-            case TreeLayout.DIRECTION_DOWN_TO_UP:
+            case Direction.DIRECTION_DOWN_TO_UP:
                 mStartX = (start.right + start.left) / 2;
                 mEndX = (end.right + end.left) / 2;
                 mStartY = start.top;

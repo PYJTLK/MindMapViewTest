@@ -7,7 +7,8 @@ import android.graphics.Path;
 import android.graphics.Rect;
 import android.view.View;
 
-import com.pyjtlk.widget.TreeLayout;
+import com.pyjtlk.widget.Direction;
+import com.pyjtlk.widget.NodeDecoratorDrawer;
 
 public class CurveDrawer extends DirectLineDrawer {
     protected float mArcStart;
@@ -18,7 +19,7 @@ public class CurveDrawer extends DirectLineDrawer {
         super(lineWidth, color);
     }
 
-    public CurveDrawer(TreeLayout.NodeDecoratorDrawer sourceDecorator, int lineWidth, int color) {
+    public CurveDrawer(NodeDecoratorDrawer sourceDecorator, int lineWidth, int color) {
         super(sourceDecorator, lineWidth, color);
     }
 
@@ -32,43 +33,43 @@ public class CurveDrawer extends DirectLineDrawer {
         mPath.reset();
 
         switch(direction){
-            case TreeLayout.DIRECTION_LEFT_TO_RIGHT:
-                mStartX = start.right;
-                mEndX = end.left;
+            case Direction.DIRECTION_LEFT_TO_RIGHT:
+                mStartX = start.right + mLineWidth / 2;
+                mEndX = end.left - mLineWidth / 2;
                 mStartY = (start.top + start.bottom) / 2;
                 mEndY = (end.top + end.bottom)  /2;
                 break;
 
-            case TreeLayout.DIRECTION_RIGHT_TO_LEFT:
-                mStartX = start.left;
-                mEndX = end.right;
+            case Direction.DIRECTION_RIGHT_TO_LEFT:
+                mStartX = start.left - mLineWidth / 2;
+                mEndX = end.right + mLineWidth / 2;
                 mStartY = (start.top + start.bottom) / 2;
                 mEndY = (end.top + end.bottom)  /2;
                 break;
 
-            case TreeLayout.DIRECTION_UP_TO_DOWN:
+            case Direction.DIRECTION_UP_TO_DOWN:
                 mStartX = (start.right + start.left) / 2;
                 mEndX = (end.right + end.left) / 2;
-                mStartY = start.bottom;
-                mEndY = end.top;
+                mStartY = start.bottom + mLineWidth / 2;
+                mEndY = end.top - mLineWidth / 2;
                 break;
 
-            case TreeLayout.DIRECTION_DOWN_TO_UP:
+            case Direction.DIRECTION_DOWN_TO_UP:
                 mStartX = (start.right + start.left) / 2;
                 mEndX = (end.right + end.left) / 2;
-                mStartY = start.top;
-                mEndY = end.bottom;
+                mStartY = start.top - mLineWidth / 2;
+                mEndY = end.bottom + mLineWidth / 2;
                 break;
         }
 
         switch(direction){
-            case TreeLayout.DIRECTION_LEFT_TO_RIGHT:
-            case TreeLayout.DIRECTION_RIGHT_TO_LEFT:
+            case Direction.DIRECTION_LEFT_TO_RIGHT:
+            case Direction.DIRECTION_RIGHT_TO_LEFT:
                 onDrawCurveHorizontal(canvas,paint);
                 break;
 
-            case TreeLayout.DIRECTION_UP_TO_DOWN:
-            case TreeLayout.DIRECTION_DOWN_TO_UP:
+            case Direction.DIRECTION_UP_TO_DOWN:
+            case Direction.DIRECTION_DOWN_TO_UP:
                 onDrawCurveVertical(canvas,paint);
                 break;
         }

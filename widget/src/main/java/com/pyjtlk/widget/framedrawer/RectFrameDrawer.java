@@ -5,9 +5,10 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.view.View;
 
+import com.pyjtlk.widget.NodeDecoratorDrawer;
 import com.pyjtlk.widget.TreeLayout;
 
-public class RectFrameDrawer extends TreeLayout.NodeDecoratorDrawer {
+public class RectFrameDrawer extends NodeDecoratorDrawer {
     private int mLineWidth;
     private int mColor;
 
@@ -15,7 +16,7 @@ public class RectFrameDrawer extends TreeLayout.NodeDecoratorDrawer {
         this(null,lineWidth,color);
     }
 
-    public RectFrameDrawer(TreeLayout.NodeDecoratorDrawer sourceDector, int lineWidth, int color) {
+    public RectFrameDrawer(NodeDecoratorDrawer sourceDector, int lineWidth, int color) {
         super(sourceDector);
         mLineWidth = lineWidth;
         mColor = color;
@@ -26,9 +27,19 @@ public class RectFrameDrawer extends TreeLayout.NodeDecoratorDrawer {
         paint.setStrokeWidth(mLineWidth);
         paint.setColor(mColor);
         paint.setStyle(Paint.Style.STROKE);
-        canvas.drawRect(start,paint);
-        canvas.drawRect(end,paint);
+        canvas.drawRect(start.left + mLineWidth / 2,
+                start.top + mLineWidth / 2,
+                start.right - mLineWidth / 2,
+                start.bottom - mLineWidth / 2,
+                paint);
+        canvas.drawRect(end.left + mLineWidth / 2,
+                end.top + mLineWidth / 2,
+                end.right - mLineWidth / 2,
+                end.bottom - mLineWidth / 2,
+                paint);
     }
+
+
 
     @Override
     public boolean skipThisDraw(View startView, View endView) {

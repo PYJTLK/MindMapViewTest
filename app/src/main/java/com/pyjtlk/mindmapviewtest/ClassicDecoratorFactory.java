@@ -1,10 +1,12 @@
 package com.pyjtlk.mindmapviewtest;
 
-import com.pyjtlk.widget.TreeLayout;
+import com.pyjtlk.widget.NodeDecoratorDrawer;
 import com.pyjtlk.widget.drawerfactory.AbsDecoratorFactory;
 import com.pyjtlk.widget.linedrawer.ConnectPointDrawer;
 import com.pyjtlk.widget.linedrawer.CurveDrawer;
 import com.pyjtlk.widget.framedrawer.RectFrameDrawer;
+import com.pyjtlk.widget.linedrawer.DirectLineDrawer;
+import com.pyjtlk.widget.linedrawer.DocumentLineDrawer;
 
 public class ClassicDecoratorFactory extends AbsDecoratorFactory {
     private int mLineWidth;
@@ -20,10 +22,11 @@ public class ClassicDecoratorFactory extends AbsDecoratorFactory {
     }
 
     @Override
-    public TreeLayout.NodeDecoratorDrawer createDecorator() {
+    public NodeDecoratorDrawer createDecorator() {
         //DocumentLineDrawer documentLineDrawer = new DocumentLineDrawer(mLineWidth,mInterval,mColor);
-        CurveDrawer curveDrawer = new CurveDrawer(mLineWidth,mColor);
-        RectFrameDrawer rectFrameDrawer = new RectFrameDrawer(curveDrawer,mLineWidth,mColor);
+        CurveDrawer documentLineDrawer = new CurveDrawer(mLineWidth,mColor);
+        //DirectLineDrawer documentLineDrawer = new DirectLineDrawer(mLineWidth,mColor);
+        RectFrameDrawer rectFrameDrawer = new RectFrameDrawer(documentLineDrawer,mLineWidth,mColor);
         ConnectPointDrawer connectPointDrawer = new ConnectPointDrawer(rectFrameDrawer,mRadius, mColor);
         return connectPointDrawer;
     }

@@ -6,16 +6,14 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+
+import com.pyjtlk.widget.MindMapLayout;
 import com.pyjtlk.widget.TreeLayout;
 
 
 public class MainActivity extends AppCompatActivity {
 
-    private TreeLayout treeView;
-    private TreeLayout treeView1;
-    private TreeLayout treeView2;
-    private TreeLayout treeView3;
-
+    private MindMapLayout mindMapLayout;
     private Button button;
 
     @Override
@@ -25,48 +23,15 @@ public class MainActivity extends AppCompatActivity {
 
         button = findViewById(R.id.button);
 
-        treeView = findViewById(R.id.treeView);
-
-        /*
-        DocumentLineDrawer documentLineDrawer = new DocumentLineDrawer(6,treeView.getLevelInterval(),Color.WHITE);
-        RectFrameDrawer rectFrameDrawer = new RectFrameDrawer(documentLineDrawer,6,Color.WHITE);
-        ConnectPointDrawer connectPointDrawer = new ConnectPointDrawer(rectFrameDrawer,6,Color.WHITE);
-
-         */
-        ClassicDecoratorFactory factory = new ClassicDecoratorFactory(6,12,treeView.getLevelInterval(),Color.BLUE);
-
-        treeView.setDecorDrawer(factory.createDecorator());
-
-
-        treeView1 = findViewById(R.id.treeView1);
-        treeView1.setDecorDrawer(factory.createDecorator());
-
-
-        treeView2 = findViewById(R.id.treeView2);
-        treeView2.setDecorDrawer(factory.createDecorator());
-
-        /*
-        treeView3 = findViewById(R.id.treeView3);
-        treeView3.setDecorDrawer(new DocumentLineDrawer(6,treeView.getLevelInterval(),Color.WHITE));
-         */
+        mindMapLayout = findViewById(R.id.mindMapLayout);
+        ClassicDecoratorFactory factory = new ClassicDecoratorFactory(6,12,150,Color.WHITE);
+        mindMapLayout.setDecorDrawer(factory.createDecorator());
     }
 
-    int i = 0;
-
     public void oncliked(View view) {
-        //treeView.lockTree(!treeView.isLocked());
-        //button.setText(treeView.isLocked() ? "locked" : "unlocked");
-        //treeView1.setVisibility(treeView1.getVisibility() == View.GONE ? View.VISIBLE : View.GONE);
-        //treeView.scaleContent(0.5f);
-        treeView.bfs(new TreeLayout.SearchListener() {
-            @Override
-            public boolean onNode(View thisNode, View parentNode) {
-                if(thisNode instanceof Button){
-                    ((Button)thisNode).setText("" + i);
-                    i++;
-                }
-                return true;
-            }
-        });
+        //button.setText(mindMapLayout.isLocked() ? "locked" : "unlocked");
+        //mindMapLayout.lockMap(!mindMapLayout.isLocked());
+        mindMapLayout.setOrientation(mindMapLayout.getOrientation() == MindMapLayout.ORIENTATION_HORIZONTAL ?
+                MindMapLayout.ORIENTATION_VERTICAL : MindMapLayout.ORIENTATION_HORIZONTAL);
     }
 }

@@ -1,7 +1,7 @@
 package com.pyjtlk.widget.drawerfactory;
 
-import com.pyjtlk.widget.TreeLayout;
+import com.pyjtlk.widget.NodeDecoratorDrawer;
 
 public abstract class AbsDecoratorFactory {
-    public abstract TreeLayout.NodeDecoratorDrawer createDecorator();
+    public abstract NodeDecoratorDrawer createDecorator();
 }

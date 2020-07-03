@@ -12,43 +12,89 @@
         android:id="@+id/button"
         android:layout_width="100dp"
         android:layout_height="50dp"
-        android:text="search"
         android:onClick="oncliked"/>
 
-    <com.pyjtlk.widget.TreeLayout
-        android:id="@+id/treeView"
+    <com.pyjtlk.widget.MindMapLayout
+        android:id="@+id/mindMapLayout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="#A00"
-        app:treeDirection="leftToRight"
-        app:branch="3"
-        app:levelInterval="50dp">
-
-        <Button
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:text="Node"/>
+        android:background="#A0A0"
+        app:orientation="vertical">
 
         <com.pyjtlk.widget.TreeLayout
-            android:id="@+id/treeView1"
+            android:id="@+id/treeView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:treeDirection="leftToRight"
+            app:treeDirection="downToUp"
             app:branch="3"
-            app:levelInterval="50dp">
+            app:levelInterval="50dp"
+            android:background="#A00A">
 
             <Button
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:text="Node"/>
 
+            <Button
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:text="Node"
+                android:layout_marginBottom="10dp"/>
+
+            <Button
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:text="Node"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"/>
+
+            <Button
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:text="Node"
+                android:layout_marginTop="10dp"/>
+        </com.pyjtlk.widget.TreeLayout>
+
+        <Button
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:text="root"/>
+
+        <com.pyjtlk.widget.TreeLayout
+            android:id="@+id/treeView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:treeDirection="upToDown"
+            app:branch="3"
+            app:levelInterval="50dp"
+            android:background="#A0AA">
+
+            <Button
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:text="Node"/>
+
+            <Button
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:text="Node"
+                android:layout_marginBottom="10dp"/>
+
+            <Button
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:text="Node"
+                android:layout_marginTop="10dp"
+                android:layout_marginBottom="10dp"/>
+
             <com.pyjtlk.widget.TreeLayout
                 android:id="@+id/treeView2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:treeDirection="leftToRight"
+                app:treeDirection="upToDown"
                 app:branch="3"
-                app:levelInterval="50dp">
+                app:levelInterval="50dp"
+                android:background="#A0AA">
 
                 <Button
                     android:layout_width="40dp"
@@ -74,32 +120,7 @@
                     android:text="Node"
                     android:layout_marginTop="10dp"/>
             </com.pyjtlk.widget.TreeLayout>
-
-            <Button
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:text="Node"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="10dp"/>
-
-            <Button
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:text="Node"
-                android:layout_marginTop="10dp"/>
         </com.pyjtlk.widget.TreeLayout>
-
-        <Button
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:text="Node"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"/>
-
-        <Button
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:text="Node" />
-    </com.pyjtlk.widget.TreeLayout>
+    </com.pyjtlk.widget.MindMapLayout>
 
 </LinearLayout>
