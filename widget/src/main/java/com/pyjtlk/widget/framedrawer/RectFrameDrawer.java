@@ -1,4 +1,4 @@
-package com.pyjtlk.widget.linedrawer;
+package com.pyjtlk.widget.framedrawer;
 
 import android.graphics.Canvas;
 import android.graphics.Paint;

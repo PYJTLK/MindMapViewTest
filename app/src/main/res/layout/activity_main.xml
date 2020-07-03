@@ -12,69 +12,94 @@
         android:id="@+id/button"
         android:layout_width="100dp"
         android:layout_height="50dp"
-        android:text="LOCKED"
+        android:text="search"
         android:onClick="oncliked"/>
 
     <com.pyjtlk.widget.TreeLayout
         android:id="@+id/treeView"
-        android:layout_width="300dp"
-        android:layout_height="300dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:background="#A00"
         app:treeDirection="leftToRight"
         app:branch="3"
         app:levelInterval="50dp">
 
-        <View
+        <Button
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:background="#A0A"/>
-
-        <View
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="#A0A0"
-            android:layout_marginBottom="10dp"/>
-
-        <View
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:background="#AAA0"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"/>
+            android:text="Node"/>
 
         <com.pyjtlk.widget.TreeLayout
             android:id="@+id/treeView1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="#A00"
             app:treeDirection="leftToRight"
             app:branch="3"
             app:levelInterval="50dp">
 
-            <View
+            <Button
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:background="#A0A"/>
+                android:text="Node"/>
 
-            <View
-                android:layout_width="40dp"
-                android:layout_height="40dp"
-                android:background="#A0A0"
-                android:layout_marginBottom="10dp"/>
+            <com.pyjtlk.widget.TreeLayout
+                android:id="@+id/treeView2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:treeDirection="leftToRight"
+                app:branch="3"
+                app:levelInterval="50dp">
 
-            <View
+                <Button
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:text="Node"/>
+
+                <Button
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:text="Node"
+                    android:layout_marginBottom="10dp"/>
+
+                <Button
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:text="Node"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"/>
+
+                <Button
+                    android:layout_width="40dp"
+                    android:layout_height="40dp"
+                    android:text="Node"
+                    android:layout_marginTop="10dp"/>
+            </com.pyjtlk.widget.TreeLayout>
+
+            <Button
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:background="#AAA0"
+                android:text="Node"
                 android:layout_marginTop="10dp"
                 android:layout_marginBottom="10dp"/>
 
-            <View
+            <Button
                 android:layout_width="40dp"
                 android:layout_height="40dp"
-                android:background="#A0A0"
+                android:text="Node"
                 android:layout_marginTop="10dp"/>
         </com.pyjtlk.widget.TreeLayout>
+
+        <Button
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:text="Node"
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"/>
+
+        <Button
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:text="Node" />
     </com.pyjtlk.widget.TreeLayout>
 
 </LinearLayout>

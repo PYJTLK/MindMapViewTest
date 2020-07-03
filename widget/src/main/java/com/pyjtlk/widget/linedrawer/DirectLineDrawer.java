@@ -7,12 +7,12 @@ import android.graphics.Rect;
 import com.pyjtlk.widget.TreeLayout;
 
 public class DirectLineDrawer extends TreeLayout.NodeDecoratorDrawer {
-    private int mLineWidth;
-    private int mColor;
-    private int mStartX;
-    private int mStartY ;
-    private int mEndX;
-    private int mEndY;
+    protected int mLineWidth;
+    protected int mColor;
+    protected int mStartX;
+    protected int mStartY ;
+    protected int mEndX;
+    protected int mEndY;
 
     public DirectLineDrawer(int lineWidth, int color){
         this(null,lineWidth,color);

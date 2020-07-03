@@ -10,6 +10,10 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+
 public class TreeLayout extends ViewGroup {
     /**
      * 树的方向：从左到右
@@ -124,6 +128,10 @@ public class TreeLayout extends ViewGroup {
         public TreeException(String message) {
             super(message);
         }
+    }
+
+    public interface SearchListener{
+        boolean onNode(View thisNode,View parentNode);
     }
 
     public TreeLayout(Context context, AttributeSet attrs) {
@@ -702,6 +710,7 @@ public class TreeLayout extends ViewGroup {
         mLocked = lock;
     }
 
+    /*
     public void scaleContent(float scale){
         scaleContentX(scale);
         scaleContentY(scale);
@@ -754,16 +763,110 @@ public class TreeLayout extends ViewGroup {
             child.setLayoutParams(newLayoutParams);
         }
     }
+     */
 
+    /**
+     * 是否为水平树
+     * @return 是否为水平树
+     */
     public boolean isTreeHorizontal(){
         return getTreeDirection() == DIRECTION_RIGHT_TO_LEFT || mTreeDirection == DIRECTION_LEFT_TO_RIGHT;
     }
 
+    /**
+     * 是否为垂直树
+     * @return 是否为垂直树
+     */
     public boolean isTreeVertical(){
         return !isTreeHorizontal();
     }
 
+    /**
+     * 获取树的方向
+     * @return 树的方向
+     */
     public int getTreeDirection(){
         return mTreeDirection;
+    }
+
+    public void dfs(SearchListener searchListener){
+        if(searchListener == null){
+            return;
+        }
+
+        View rootNode = getChildAt(0);
+
+        dfsInside(this,null,searchListener);
+    }
+
+    protected boolean dfsInside(View thisNode,View parentNode,SearchListener searchListener){
+        if(thisNode instanceof TreeLayout){
+            TreeLayout treeLayout = (TreeLayout) thisNode;
+            View rootNode = treeLayout.getChildAt(0);
+
+            if(!searchListener.onNode(rootNode,parentNode)){
+                return false;
+            }
+
+            for(int i = 1;i < treeLayout.getChildCount();i++){
+                View childNode = treeLayout.getChildAt(i);
+                boolean continueSearch = treeLayout.dfsInside(childNode,rootNode,searchListener);
+                if(!continueSearch){
+                    return false;
+                }
+            }
+            return true;
+        }
+
+       return searchListener.onNode(thisNode,parentNode);
+    }
+
+    public void bfs(SearchListener searchListener){
+        if(searchListener == null){
+            return;
+        }
+
+        List<Node> nodeQueue = new LinkedList<>();
+        bfsInside(this,null,searchListener,nodeQueue);
+    }
+
+    protected boolean bfsInside(View thisNode,View parentNode,SearchListener searchListener,List<Node> nodeQueue){
+        if(thisNode instanceof TreeLayout){
+            TreeLayout treeLayout = (TreeLayout) thisNode;
+            View rootNode = treeLayout.getChildAt(0);
+
+            if(!searchListener.onNode(rootNode,parentNode)){
+                return false;
+            }
+
+            for(int i = 1;i < treeLayout.getChildCount();i++){
+                View childNode = treeLayout.getChildAt(i);
+                boolean continueSearch = searchListener.onNode(childNode,rootNode);
+                if(!continueSearch){
+                    return false;
+                }
+
+                if(childNode instanceof TreeLayout){
+                    nodeQueue.add(new Node(rootNode,childNode));
+                }
+            }
+        }
+
+        if(nodeQueue.size() <= 0){
+            return false;
+        }
+
+        Node node = nodeQueue.remove(0);
+        return bfsInside(node.thisView,node.parentNodeView,searchListener,nodeQueue);
+    }
+
+    private static class Node{
+        View parentNodeView;
+        View thisView;
+
+        public Node(View parentNodeView, View thisView) {
+            this.parentNodeView = parentNodeView;
+            this.thisView = thisView;
+        }
     }
 }

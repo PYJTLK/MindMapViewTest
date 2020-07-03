@@ -8,10 +8,6 @@ import com.pyjtlk.widget.TreeLayout;
 
 public class DocumentLineDrawer extends DirectLineDrawer{
     private int mLevelInterval;
-    private int mStartX;
-    private int mStartY ;
-    private int mEndX;
-    private int mEndY;
 
     public DocumentLineDrawer(int lineWidth,int levelInterval,int color) {
         super(lineWidth, color);
