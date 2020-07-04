@@ -12,12 +12,13 @@ public interface SearchListener {
      * @param parentNode 父结点
      * @return 返回true，则继续遍历，返回false，则中断此次遍历
      */
-    boolean onNode(View thisNode, View parentNode);
+    boolean onLeafNode(View thisNode, View parentNode);
+
+    boolean onRootNode(View thisNode,View parentNode);
 
     /**
-     * 结点为叶结点时调用
-     * @param thisNode
-     * @param parentNode
+     * 开始访问树形布局时调用
+     * @param treeLayout 当前的树形布局
      */
-    void onBranchEnd(View thisNode, View parentNode);
+    void onTreeStart(TreeLayout treeLayout);
 }

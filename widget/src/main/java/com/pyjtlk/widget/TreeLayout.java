@@ -570,15 +570,18 @@ public class TreeLayout extends ViewGroup {
 
         SearchListener treeSearchListener = new SearchListener(){
             @Override
-            public boolean onNode(View thisNode, View parentNode) {
-                if(thisNode instanceof TreeLayout){
-                    ((TreeLayout)thisNode).setDecorDrawer(mDecoratorDrawer);
-                }
+            public boolean onLeafNode(View thisNode, View parentNode) {
                 return true;
             }
 
             @Override
-            public void onBranchEnd(View thisNode, View parentNode) {
+            public boolean onRootNode(View thisNode, View parentNode) {
+                return true;
+            }
+
+            @Override
+            public void onTreeStart(TreeLayout treeLayout) {
+                treeLayout.setDecorDrawer(mDecoratorDrawer);
             }
         };
 
@@ -596,15 +599,18 @@ public class TreeLayout extends ViewGroup {
 
         SearchListener treeSearchListener = new SearchListener(){
             @Override
-            public boolean onNode(View thisNode, View parentNode) {
-                if(thisNode instanceof TreeLayout){
-                    ((TreeLayout)thisNode).setTreeDirection(mTreeDirection.direction);
-                }
+            public boolean onLeafNode(View thisNode, View parentNode) {
                 return true;
             }
 
             @Override
-            public void onBranchEnd(View thisNode, View parentNode) {
+            public boolean onRootNode(View thisNode, View parentNode) {
+                return true;
+            }
+
+            @Override
+            public void onTreeStart(TreeLayout treeLayout) {
+                treeLayout.setTreeDirection(mTreeDirection.direction);
             }
         };
 
@@ -793,7 +799,9 @@ public class TreeLayout extends ViewGroup {
             TreeLayout treeLayout = (TreeLayout) thisNode;
             View rootNode = treeLayout.getChildAt(0);
 
-            if(!searchListener.onNode(rootNode,parentNode)){
+            searchListener.onTreeStart((TreeLayout) thisNode);
+
+            if(!searchListener.onRootNode(rootNode,parentNode)){
                 return false;
             }
 
@@ -807,8 +815,7 @@ public class TreeLayout extends ViewGroup {
             return true;
         }
 
-        searchListener.onBranchEnd(thisNode,parentNode);
-        return searchListener.onNode(thisNode,parentNode);
+        return searchListener.onLeafNode(thisNode,parentNode);
     }
 
     /**
@@ -826,10 +833,12 @@ public class TreeLayout extends ViewGroup {
 
     protected boolean bfsInside(View thisNode,View parentNode,SearchListener searchListener,List<Node> nodeQueue){
         if(thisNode instanceof TreeLayout){
+            searchListener.onTreeStart((TreeLayout) thisNode);
+
             TreeLayout treeLayout = (TreeLayout) thisNode;
             View rootNode = treeLayout.getChildAt(0);
 
-            if(!searchListener.onNode(rootNode,parentNode)){
+            if(!searchListener.onRootNode(rootNode,parentNode)){
                 return false;
             }
 
@@ -838,12 +847,10 @@ public class TreeLayout extends ViewGroup {
                 if(childNode instanceof TreeLayout){
                     nodeQueue.add(new Node(rootNode,childNode));
                 }else{
-                    searchListener.onBranchEnd(thisNode,parentNode);
-                }
-
-                boolean continueSearch = searchListener.onNode(childNode,rootNode);
-                if(!continueSearch){
-                    return false;
+                    boolean continueSearch = searchListener.onLeafNode(childNode,rootNode);
+                    if(!continueSearch){
+                        return false;
+                    }
                 }
             }
         }
@@ -852,8 +859,8 @@ public class TreeLayout extends ViewGroup {
             return false;
         }
 
-        Node node = nodeQueue.remove(0);
-        return bfsInside(node.thisView,node.parentNodeView,searchListener,nodeQueue);
+        Node treeNode = nodeQueue.remove(0);
+        return bfsInside(treeNode.thisView,treeNode.parentNodeView,searchListener,nodeQueue);
     }
 
     /**
@@ -871,5 +878,28 @@ public class TreeLayout extends ViewGroup {
     public void skipDrawDecorator(boolean skip){
         mSkipDrawDecorator = skip;
         invalidate();
+    }
+
+    public void skipUnionDrawDecorator(boolean skip){
+        mSkipDrawDecorator = skip;
+
+        SearchListener treeSearchListener = new SearchListener(){
+            @Override
+            public boolean onLeafNode(View thisNode, View parentNode) {
+                return true;
+            }
+
+            @Override
+            public boolean onRootNode(View thisNode, View parentNode) {
+                return true;
+            }
+
+            @Override
+            public void onTreeStart(TreeLayout treeLayout) {
+                treeLayout.skipDrawDecorator(mSkipDrawDecorator);
+            }
+        };
+
+        bfs(treeSearchListener);
     }
 }

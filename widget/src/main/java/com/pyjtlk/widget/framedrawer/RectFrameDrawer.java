@@ -39,8 +39,6 @@ public class RectFrameDrawer extends NodeDecoratorDrawer {
                 paint);
     }
 
-
-
     @Override
     public boolean skipThisDraw(View startView, View endView) {
         return endView instanceof TreeLayout;

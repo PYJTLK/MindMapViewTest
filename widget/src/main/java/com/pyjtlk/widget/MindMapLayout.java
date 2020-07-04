@@ -12,7 +12,14 @@ import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 
 public class MindMapLayout extends ViewGroup {
+    /**
+     * 思维导图方向：水平方向
+     */
     public static final int ORIENTATION_HORIZONTAL = 0;
+
+    /**
+     * 思维导图方向：竖直方向
+     */
     public static final int ORIENTATION_VERTICAL = 1;
 
     private TreeLayout mLeftLayout;
@@ -39,6 +46,7 @@ public class MindMapLayout extends ViewGroup {
             super(message);
         }
     }
+
 
     public MindMapLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -79,6 +87,11 @@ public class MindMapLayout extends ViewGroup {
         }
     }
 
+    /**
+     * 水平方向测量
+     * @param widthMeasureSpec 宽度测量参数
+     * @param heightMeasureSpec 高度测量参数
+     */
     protected void onMeasureHorizontal(int widthMeasureSpec, int heightMeasureSpec){
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int widthMode = MeasureSpec.getMode(widthMeasureSpec);
@@ -99,7 +112,7 @@ public class MindMapLayout extends ViewGroup {
         setMeasuredDimension(MeasureSpec.makeMeasureSpec(width,widthMode),MeasureSpec.makeMeasureSpec(height,heightMode));
     }
 
-    protected int measureWrapWidthHorizontal(){
+    private int measureWrapWidthHorizontal(){
         int wrapWidth = 0;
 
         for(int i = 0;i < getChildCount();i++){
@@ -113,7 +126,7 @@ public class MindMapLayout extends ViewGroup {
         return wrapWidth;
     }
 
-    protected int measureWrapHeightHorizontal(){
+    private int measureWrapHeightHorizontal(){
         int wrapHeight = 0;
         int height;
 
@@ -129,6 +142,11 @@ public class MindMapLayout extends ViewGroup {
         return wrapHeight;
     }
 
+    /**
+     * 竖直方向测量
+     * @param widthMeasureSpec 宽度测量参数
+     * @param heightMeasureSpec 高度测量参数
+     */
     protected void onMeasureVertical(int widthMeasureSpec, int heightMeasureSpec){
         int width = MeasureSpec.getSize(widthMeasureSpec);
         int widthMode = MeasureSpec.getMode(widthMeasureSpec);
@@ -149,7 +167,7 @@ public class MindMapLayout extends ViewGroup {
         setMeasuredDimension(MeasureSpec.makeMeasureSpec(width,widthMode),MeasureSpec.makeMeasureSpec(height,heightMode));
     }
 
-    protected int measureWrapHeightVertical(){
+    private int measureWrapHeightVertical(){
         int wrapHeight = 0;
 
         for(int i = 0;i < getChildCount();i++){
@@ -163,7 +181,7 @@ public class MindMapLayout extends ViewGroup {
         return wrapHeight;
     }
 
-    protected int measureWrapWidthVertical(){
+    private int measureWrapWidthVertical(){
         int wrapWidth = 0;
         int width;
 
@@ -182,13 +200,16 @@ public class MindMapLayout extends ViewGroup {
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         if(mOrientation == ORIENTATION_HORIZONTAL){
-            onLayoutHorizontal(changed,l,t,r,b);
+            onLayoutHorizontal();
         }else{
-            onLayoutVertical(changed,l,t,r,b);
+            onLayoutVertical();
         }
     }
 
-    protected void onLayoutHorizontal(boolean changed, int l, int t, int r, int b){
+    /**
+     * 水平方向摆放
+     */
+    protected void onLayoutHorizontal(){
         int left = 0;
         int right = mLeftLayout.getMeasuredWidth();
         int top = (mWrapHeight - mLeftLayout.getMeasuredHeight()) / 2;
@@ -214,7 +235,10 @@ public class MindMapLayout extends ViewGroup {
                 top + mRightLayout.getMeasuredHeight());
     }
 
-    protected void onLayoutVertical(boolean changed, int l, int t, int r, int b){
+    /**
+     * 竖直方向摆放
+     */
+    protected void onLayoutVertical(){
         int left = (mWrapWidth - mTopLayout.getMeasuredWidth()) / 2;
         int top = 0;
         int bottom = top + mTopLayout.getMeasuredHeight();
@@ -309,7 +333,7 @@ public class MindMapLayout extends ViewGroup {
     }
 
     /**
-     * 设置点缀绘制器
+     * 设置点缀绘制器，此方法会把左右所有子树都设置为同一种绘制器，详见{@link TreeLayout#setUnionDecorDrawer(NodeDecoratorDrawer)}
      * @param decortator 点缀绘制器
      */
     public void setDecorDrawer(NodeDecoratorDrawer decortator){
@@ -327,6 +351,10 @@ public class MindMapLayout extends ViewGroup {
         requestLayout();
     }
 
+    /**
+     * 设置水平点缀绘制器
+     * @param decortator 点缀绘制器
+     */
     protected void setDecorDrawerHorizontal(NodeDecoratorDrawer decortator){
         mDecoratorDrawer = decortator;
         mSkipDrawDecorator = false;
@@ -334,6 +362,10 @@ public class MindMapLayout extends ViewGroup {
         mRightLayout.setUnionDecorDrawer(decortator);
     }
 
+    /**
+     * 设置竖直点缀绘制器
+     * @param decortator 点缀绘制器
+     */
     protected void setDecorDrawerVertical(NodeDecoratorDrawer decortator){
         mDecoratorDrawer = decortator;
         mSkipDrawDecorator = false;
@@ -341,10 +373,28 @@ public class MindMapLayout extends ViewGroup {
         mBottomLayout.setUnionDecorDrawer(decortator);
     }
 
+    /**
+     * 是否跳过绘制点缀
+     * @return 是否跳过绘制点缀
+     */
+    public boolean isSkipDrawDecorator(){
+        return mSkipDrawDecorator;
+    }
+
+    /**
+     * 跳过绘制点缀，纯布局摆放，没有装饰
+     * @param skip 是否跳过绘制点缀
+     */
     public void skipDrawDecorator(boolean skip){
         mSkipDrawDecorator = skip;
-        mLeftLayout.skipDrawDecorator(skip);
-        mRightLayout.skipDrawDecorator(skip);
+        if(mOrientation == ORIENTATION_HORIZONTAL){
+            mLeftLayout.skipUnionDrawDecorator(skip);
+            mRightLayout.skipUnionDrawDecorator(skip);
+        }else{
+            mTopLayout.skipUnionDrawDecorator(skip);
+            mBottomLayout.skipUnionDrawDecorator(skip);
+        }
+        invalidate();
     }
 
     @Override
@@ -355,6 +405,10 @@ public class MindMapLayout extends ViewGroup {
         }
     }
 
+    /**
+     * 绘制点缀
+     * @param canvas 此布局控件的画布
+     */
     protected void onDrawDecorator(Canvas canvas){
         if(mDecoratorDrawer == null){
             return;
@@ -386,7 +440,7 @@ public class MindMapLayout extends ViewGroup {
         canvas.restore();
     }
 
-    protected void onDrawDecoratorHorizontal(Canvas canvas){
+    private void onDrawDecoratorHorizontal(Canvas canvas){
         mStartRect.left = mRootNode.getLeft();
         mStartRect.right = mRootNode.getRight();
         mStartRect.top = mRootNode.getTop();
@@ -405,7 +459,7 @@ public class MindMapLayout extends ViewGroup {
         mDecoratorDrawer.drawDecorator(canvas,mPaint,mStartRect,mEndRect,mRootNode,mRootNode,Direction.DIRECTION_LEFT_TO_RIGHT);
     }
 
-    protected void onDrawDecoratorVertical(Canvas canvas){
+    private void onDrawDecoratorVertical(Canvas canvas){
         mStartRect.left = mRootNode.getLeft();
         mStartRect.right = mRootNode.getRight();
         mStartRect.top = mRootNode.getTop();
@@ -475,55 +529,107 @@ public class MindMapLayout extends ViewGroup {
         return !mLocked;
     }
 
+    /**
+     * 设置思维导图布局的方向
+     * @param orientation 方向
+     * 水平方向{@link #ORIENTATION_HORIZONTAL}
+     * 竖直方向{@link #ORIENTATION_VERTICAL}
+     */
     public void setOrientation(int orientation){
-        if(mOrientation == orientation) {
-            return;
-        }
+       mOrientation = orientation;
 
-        if(mOrientation == ORIENTATION_HORIZONTAL){
-            mOrientation = ORIENTATION_VERTICAL;
-            mTopLayout = mLeftLayout;
-            mBottomLayout = mRightLayout;
-            mTopLayout.setUnionTreeDirection(Direction.DIRECTION_DOWN_TO_UP);
-            mBottomLayout.setUnionTreeDirection(Direction.DIRECTION_UP_TO_DOWN);
-        }else{
-            mOrientation = ORIENTATION_HORIZONTAL;
-            mLeftLayout = mTopLayout;
-            mRightLayout = mBottomLayout;
-            mLeftLayout.setUnionTreeDirection(Direction.DIRECTION_RIGHT_TO_LEFT);
-            mRightLayout.setUnionTreeDirection(Direction.DIRECTION_LEFT_TO_RIGHT);
-        }
+        getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                if(mOrientation == ORIENTATION_VERTICAL){
+                    if(mTopLayout == null && mBottomLayout == null){
+                        mTopLayout = mLeftLayout;
+                        mBottomLayout = mRightLayout;
+                    }
+
+                    mLeftLayout = null;
+                    mRightLayout = null;
+
+                    mTopLayout.setUnionTreeDirection(Direction.DIRECTION_DOWN_TO_UP);
+                    mBottomLayout.setUnionTreeDirection(Direction.DIRECTION_UP_TO_DOWN);
+                }else{
+                    if(mLeftLayout == null && mRightLayout == null){
+                        mLeftLayout = mTopLayout;
+                        mRightLayout = mBottomLayout;
+                    }
+
+                    mTopLayout = null;
+                    mBottomLayout = null;
+
+                    mLeftLayout.setUnionTreeDirection(Direction.DIRECTION_RIGHT_TO_LEFT);
+                    mRightLayout.setUnionTreeDirection(Direction.DIRECTION_LEFT_TO_RIGHT);
+                }
+            }
+        });
         requestLayout();
     }
 
+    /**
+     * 获取布局方向
+     * @return 布局方向
+     */
     public int getOrientation(){
         return mOrientation;
     }
 
+    /**
+     * 锁定布局，锁定布局后不会拦截触摸事件。解锁后布局可拖拽
+     * @param locked 是否锁定
+     */
     public void lockMap(boolean locked){
         mLocked = locked;
     }
 
+    /**
+     * 是否锁定布局
+     * @return 是否锁定布局
+     */
     public boolean isLocked(){
         return mLocked;
     }
 
+    /**
+     * 获取思维导图的左子树
+     * @return 思维导图的左子树
+     */
     public final TreeLayout getLeftTree(){
         return mLeftLayout;
     }
 
+    /**
+     * 获取思维导图的右子树
+     * @return 思维导图的右子树
+     */
     public final TreeLayout getRightTree() {
         return mRightLayout;
     }
 
+    /**
+     * 获取思维导图的上子树
+     * @return 思维导图的上子树
+     */
     public final TreeLayout getTopTree(){
         return mTopLayout;
     }
 
+    /**
+     * 获取思维导图的下子树
+     * @return 思维导图的下子树
+     */
     public final TreeLayout getBottomTree(){
         return mBottomLayout;
     }
 
+    /**
+     * 获取思维导图的根结点，思维导图的根结点不属于左右子树
+     * @return 思维导图的根结点
+     */
     public final View getRootNode(){
         return mRootNode;
     }
