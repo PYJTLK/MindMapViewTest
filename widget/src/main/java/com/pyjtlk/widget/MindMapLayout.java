@@ -74,6 +74,8 @@ public class MindMapLayout extends ViewGroup {
 
         mPaint = new Paint();
         mPaint.setAntiAlias(true);
+
+        setOrientation(mOrientation);
     }
 
     @Override
