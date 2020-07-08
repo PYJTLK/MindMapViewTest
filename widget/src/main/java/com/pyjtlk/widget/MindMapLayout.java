@@ -27,7 +27,7 @@ public class MindMapLayout extends ViewGroup {
     private TreeLayout mTopLayout;
     private TreeLayout mBottomLayout;
     private View mRootNode;
-    private int mOrientation;
+    private Orientation mOrientation;
     private boolean mLocked;
     private int mWrapWidth;
     private int mWrapHeight;
@@ -40,6 +40,8 @@ public class MindMapLayout extends ViewGroup {
     private float mLastX;
     private float mLastY;
     private boolean mMovePrepared;
+    private Horizontal mHorizontal;
+    private Vertical mVertical;
 
     private static class MindMapLayoutException extends RuntimeException{
         public MindMapLayoutException(String message) {
@@ -47,6 +49,298 @@ public class MindMapLayout extends ViewGroup {
         }
     }
 
+    private static abstract class Orientation{
+        protected abstract void init();
+
+        protected abstract void onMeasure(int widthMeasureSpec, int heightMeasureSpec);
+
+        protected abstract void onLayout(boolean changed, int l, int t, int r, int b);
+
+        protected abstract void onDrawDecorator(Canvas canvas);
+
+        protected abstract void onOrientationChanged();
+
+        protected abstract void skipDrawDecorator(boolean skip);
+
+        protected abstract void setDecorDrawer(NodeDecoratorDrawer nodeDecoratorDrawer);
+    }
+
+    private class Horizontal extends Orientation{
+        @Override
+        protected void init() {
+            mLeftLayout = (TreeLayout) getChildAt(0);
+            mRightLayout = (TreeLayout) getChildAt(2);
+
+            mLeftLayout.getRootNode().setVisibility(GONE);
+            mLeftLayout.lockTree(true);
+            mRightLayout.getRootNode().setVisibility(GONE);
+            mRightLayout.lockTree(true);
+        }
+
+        @Override
+        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec){
+            int width = MeasureSpec.getSize(widthMeasureSpec);
+            int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+            int height = MeasureSpec.getSize(heightMeasureSpec);
+            int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+
+            mWrapWidth = measureWrapWidthHorizontal();
+            mWrapHeight = measureWrapHeightHorizontal();
+
+            if(widthMode == MeasureSpec.AT_MOST){
+                width = mWrapWidth;
+            }
+
+            if(heightMode == MeasureSpec.AT_MOST){
+                height = mWrapHeight;
+            }
+
+            setMeasuredDimension(MeasureSpec.makeMeasureSpec(width,widthMode),MeasureSpec.makeMeasureSpec(height,heightMode));
+        }
+
+        private int measureWrapWidthHorizontal(){
+            int wrapWidth = 0;
+
+            for(int i = 0;i < getChildCount();i++){
+                View child = getChildAt(i);
+                if(child.getVisibility() == GONE){
+                    continue;
+                }
+                wrapWidth += child.getMeasuredWidth();
+            }
+
+            return wrapWidth;
+        }
+
+        private int measureWrapHeightHorizontal(){
+            int wrapHeight = 0;
+            int height;
+
+            for(int i = 0;i < getChildCount();i++){
+                View child = getChildAt(i);
+                if(child.getVisibility() == GONE){
+                    continue;
+                }
+                height = child.getMeasuredHeight();
+                wrapHeight = Math.max(wrapHeight,height);
+            }
+
+            return wrapHeight;
+        }
+
+        @Override
+        protected void onLayout(boolean changed, int l, int t, int r, int b){
+            int left = 0;
+            int right = mLeftLayout.getMeasuredWidth();
+            int top = (mWrapHeight - mLeftLayout.getMeasuredHeight()) / 2;
+            mLeftLayout.layout(left,
+                    top,
+                    right,
+                    top + mLeftLayout.getMeasuredHeight());
+
+            left = right;
+            right += mRootNode.getMeasuredWidth();
+            top = (mWrapHeight - mRootNode.getMeasuredHeight()) / 2;
+            mRootNode.layout(left,
+                    top,
+                    right,
+                    top + mRootNode.getMeasuredHeight());
+
+            left = right;
+            right += mRightLayout.getMeasuredWidth();
+            top = (mWrapHeight - mRightLayout.getMeasuredHeight()) / 2;
+            mRightLayout.layout(left,
+                    top,
+                    right,
+                    top + mRightLayout.getMeasuredHeight());
+        }
+
+        @Override
+        protected void onDrawDecorator(Canvas canvas){
+            mStartRect.left = mRootNode.getLeft();
+            mStartRect.right = mRootNode.getRight();
+            mStartRect.top = mRootNode.getTop();
+            mStartRect.bottom = mRootNode.getBottom();
+
+            mEndRect.left = mStartRect.right;
+            mEndRect.right = mStartRect.left;
+            mEndRect.top = mStartRect.top;
+            mEndRect.bottom = mStartRect.bottom;
+            mDecoratorDrawer.drawDecorator(canvas,mPaint,mStartRect,mEndRect,mRootNode,mRootNode,Direction.DIRECTION_RIGHT_TO_LEFT);
+
+            mEndRect.left = mStartRect.right;
+            mEndRect.right = mStartRect.left;
+            mEndRect.top = mStartRect.top;
+            mEndRect.bottom = mStartRect.bottom;
+            mDecoratorDrawer.drawDecorator(canvas,mPaint,mStartRect,mEndRect,mRootNode,mRootNode,Direction.DIRECTION_LEFT_TO_RIGHT);
+        }
+
+        @Override
+        protected void onOrientationChanged() {
+            if(mLeftLayout == null && mRightLayout == null){
+                mLeftLayout = mTopLayout;
+                mRightLayout = mBottomLayout;
+            }
+
+            mTopLayout = null;
+            mBottomLayout = null;
+
+            mLeftLayout.setUnionTreeDirection(Direction.DIRECTION_RIGHT_TO_LEFT);
+            mRightLayout.setUnionTreeDirection(Direction.DIRECTION_LEFT_TO_RIGHT);
+        }
+
+        @Override
+        protected void skipDrawDecorator(boolean skip) {
+            mLeftLayout.skipUnionDrawDecorator(skip);
+            mRightLayout.skipUnionDrawDecorator(skip);
+        }
+
+        @Override
+        protected void setDecorDrawer(NodeDecoratorDrawer nodeDecoratorDrawer) {
+            mDecoratorDrawer = nodeDecoratorDrawer;
+            mSkipDrawDecorator = false;
+            mLeftLayout.setUnionDecorDrawer(nodeDecoratorDrawer);
+            mRightLayout.setUnionDecorDrawer(nodeDecoratorDrawer);
+        }
+    }
+
+    private class Vertical extends Orientation{
+        @Override
+        protected void init() {
+            mTopLayout = (TreeLayout) getChildAt(0);
+            mBottomLayout = (TreeLayout) getChildAt(2);
+
+            mTopLayout.getRootNode().setVisibility(GONE);
+            mTopLayout.lockTree(true);
+            mBottomLayout.getRootNode().setVisibility(GONE);
+            mBottomLayout.lockTree(true);
+        }
+
+        protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec){
+            int width = MeasureSpec.getSize(widthMeasureSpec);
+            int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+            int height = MeasureSpec.getSize(heightMeasureSpec);
+            int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+
+            mWrapWidth = measureWrapWidthVertical();
+            mWrapHeight = measureWrapHeightVertical();
+
+            if(widthMode == MeasureSpec.AT_MOST){
+                width = mWrapWidth;
+            }
+
+            if(heightMode == MeasureSpec.AT_MOST){
+                height = mWrapHeight;
+            }
+
+            setMeasuredDimension(MeasureSpec.makeMeasureSpec(width,widthMode),MeasureSpec.makeMeasureSpec(height,heightMode));
+        }
+
+        private int measureWrapHeightVertical(){
+            int wrapHeight = 0;
+
+            for(int i = 0;i < getChildCount();i++){
+                View child = getChildAt(i);
+                if(child.getVisibility() == GONE){
+                    continue;
+                }
+                wrapHeight += child.getMeasuredHeight();
+            }
+
+            return wrapHeight;
+        }
+
+        private int measureWrapWidthVertical(){
+            int wrapWidth = 0;
+            int width;
+
+            for(int i = 0;i < getChildCount();i++){
+                View child = getChildAt(i);
+                if(child.getVisibility() == GONE){
+                    continue;
+                }
+                width = child.getMeasuredWidth();
+                wrapWidth = Math.max(wrapWidth,width);
+            }
+
+            return wrapWidth;
+        }
+
+        @Override
+        protected void onLayout(boolean changed, int l, int t, int r, int b){
+            int left = (mWrapWidth - mTopLayout.getMeasuredWidth()) / 2;
+            int top = 0;
+            int bottom = top + mTopLayout.getMeasuredHeight();
+            mTopLayout.layout(left,
+                    top,
+                    left + mTopLayout.getMeasuredWidth(),
+                    bottom);
+
+            top = bottom;
+            bottom += mRootNode.getMeasuredHeight();
+            left = (mWrapWidth - mRootNode.getMeasuredWidth()) / 2;
+            mRootNode.layout(left,
+                    top,
+                    left + mRootNode.getMeasuredWidth(),
+                    bottom);
+
+            top = bottom;
+            bottom += mBottomLayout.getMeasuredHeight();
+            left = (mWrapWidth - mBottomLayout.getMeasuredWidth()) / 2;
+            mBottomLayout.layout(left,
+                    top,
+                    left + mBottomLayout.getMeasuredWidth(),
+                    bottom);
+        }
+
+        @Override
+        protected void onDrawDecorator(Canvas canvas){
+            mStartRect.left = mRootNode.getLeft();
+            mStartRect.right = mRootNode.getRight();
+            mStartRect.top = mRootNode.getTop();
+            mStartRect.bottom = mRootNode.getBottom();
+
+            mEndRect.left = mStartRect.left;
+            mEndRect.right = mStartRect.right;
+            mEndRect.top = mStartRect.top;
+            mEndRect.bottom = mStartRect.top;
+            mDecoratorDrawer.drawDecorator(canvas,mPaint,mStartRect,mEndRect,mRootNode,mRootNode,Direction.DIRECTION_DOWN_TO_UP);
+
+            mEndRect.left = mStartRect.left;
+            mEndRect.right = mStartRect.right;
+            mEndRect.top = mStartRect.bottom;
+            mEndRect.bottom = mStartRect.bottom;
+            mDecoratorDrawer.drawDecorator(canvas,mPaint,mStartRect,mEndRect,mRootNode,mRootNode,Direction.DIRECTION_UP_TO_DOWN);
+        }
+
+        @Override
+        protected void onOrientationChanged() {
+            if(mTopLayout == null && mBottomLayout == null){
+                mTopLayout = mLeftLayout;
+                mBottomLayout = mRightLayout;
+            }
+
+            mLeftLayout = null;
+            mRightLayout = null;
+
+            mTopLayout.setUnionTreeDirection(Direction.DIRECTION_DOWN_TO_UP);
+            mBottomLayout.setUnionTreeDirection(Direction.DIRECTION_UP_TO_DOWN);
+        }
+
+        @Override
+        protected void skipDrawDecorator(boolean skip) {
+            mTopLayout.skipUnionDrawDecorator(skip);
+            mBottomLayout.skipUnionDrawDecorator(skip);
+        }
+
+        @Override
+        protected void setDecorDrawer(NodeDecoratorDrawer nodeDecoratorDrawer) {
+            mDecoratorDrawer = nodeDecoratorDrawer;
+            mSkipDrawDecorator = false;
+            mTopLayout.setUnionDecorDrawer(nodeDecoratorDrawer);
+            mBottomLayout.setUnionDecorDrawer(nodeDecoratorDrawer);
+        }
+    }
 
     public MindMapLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -60,13 +354,11 @@ public class MindMapLayout extends ViewGroup {
 
     private void init(Context context, AttributeSet attrs){
         TypedArray typedArray = context.obtainStyledAttributes(attrs,R.styleable.MindMapLayout);
-        mOrientation = typedArray.getInt(R.styleable.MindMapLayout_orientation,0);
+        int orientation = typedArray.getInt(R.styleable.MindMapLayout_orientation,0);
         mLocked = typedArray.getBoolean(R.styleable.MindMapLayout_mapLocked,true);
         typedArray.recycle();
 
         mSkipDrawDecorator = true;
-
-        setClipChildren(false);
 
         mPaddingClipRect = new Rect();
         mStartRect = new Rect();
@@ -75,216 +367,32 @@ public class MindMapLayout extends ViewGroup {
         mPaint = new Paint();
         mPaint.setAntiAlias(true);
 
-        setOrientation(mOrientation);
+        mHorizontal = new Horizontal();
+        mVertical = new Vertical();
+
+        setOrientation(orientation);
     }
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         initChildren(widthMeasureSpec,heightMeasureSpec);
 
-        if(mOrientation == ORIENTATION_HORIZONTAL){
-            onMeasureHorizontal(widthMeasureSpec,heightMeasureSpec);
-        }else{
-            onMeasureVertical(widthMeasureSpec,heightMeasureSpec);
-        }
+        mOrientation.onMeasure(widthMeasureSpec,heightMeasureSpec);
     }
 
-    /**
-     * 水平方向测量
-     * @param widthMeasureSpec 宽度测量参数
-     * @param heightMeasureSpec 高度测量参数
-     */
-    protected void onMeasureHorizontal(int widthMeasureSpec, int heightMeasureSpec){
-        int width = MeasureSpec.getSize(widthMeasureSpec);
-        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
-        int height = MeasureSpec.getSize(heightMeasureSpec);
-        int heightMode = MeasureSpec.getMode(heightMeasureSpec);
-
-        mWrapWidth = measureWrapWidthHorizontal();
-        mWrapHeight = measureWrapHeightHorizontal();
-
-        if(widthMode == MeasureSpec.AT_MOST){
-            width = mWrapWidth;
-        }
-
-        if(heightMode == MeasureSpec.AT_MOST){
-            height = mWrapHeight;
-        }
-
-        setMeasuredDimension(MeasureSpec.makeMeasureSpec(width,widthMode),MeasureSpec.makeMeasureSpec(height,heightMode));
-    }
-
-    private int measureWrapWidthHorizontal(){
-        int wrapWidth = 0;
-
-        for(int i = 0;i < getChildCount();i++){
-            View child = getChildAt(i);
-            if(child.getVisibility() == GONE){
-                continue;
-            }
-            wrapWidth += child.getMeasuredWidth();
-        }
-
-        return wrapWidth;
-    }
-
-    private int measureWrapHeightHorizontal(){
-        int wrapHeight = 0;
-        int height;
-
-        for(int i = 0;i < getChildCount();i++){
-            View child = getChildAt(i);
-            if(child.getVisibility() == GONE){
-                continue;
-            }
-            height = child.getMeasuredHeight();
-            wrapHeight = Math.max(wrapHeight,height);
-        }
-
-        return wrapHeight;
-    }
-
-    /**
-     * 竖直方向测量
-     * @param widthMeasureSpec 宽度测量参数
-     * @param heightMeasureSpec 高度测量参数
-     */
-    protected void onMeasureVertical(int widthMeasureSpec, int heightMeasureSpec){
-        int width = MeasureSpec.getSize(widthMeasureSpec);
-        int widthMode = MeasureSpec.getMode(widthMeasureSpec);
-        int height = MeasureSpec.getSize(heightMeasureSpec);
-        int heightMode = MeasureSpec.getMode(heightMeasureSpec);
-
-        mWrapWidth = measureWrapWidthVertical();
-        mWrapHeight = measureWrapHeightVertical();
-
-        if(widthMode == MeasureSpec.AT_MOST){
-            width = mWrapWidth;
-        }
-
-        if(heightMode == MeasureSpec.AT_MOST){
-            height = mWrapHeight;
-        }
-
-        setMeasuredDimension(MeasureSpec.makeMeasureSpec(width,widthMode),MeasureSpec.makeMeasureSpec(height,heightMode));
-    }
-
-    private int measureWrapHeightVertical(){
-        int wrapHeight = 0;
-
-        for(int i = 0;i < getChildCount();i++){
-            View child = getChildAt(i);
-            if(child.getVisibility() == GONE){
-                continue;
-            }
-            wrapHeight += child.getMeasuredHeight();
-        }
-
-        return wrapHeight;
-    }
-
-    private int measureWrapWidthVertical(){
-        int wrapWidth = 0;
-        int width;
-
-        for(int i = 0;i < getChildCount();i++){
-            View child = getChildAt(i);
-            if(child.getVisibility() == GONE){
-                continue;
-            }
-            width = child.getMeasuredWidth();
-            wrapWidth = Math.max(wrapWidth,width);
-        }
-
-        return wrapWidth;
-    }
 
     @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        if(mOrientation == ORIENTATION_HORIZONTAL){
-            onLayoutHorizontal();
-        }else{
-            onLayoutVertical();
-        }
-    }
-
-    /**
-     * 水平方向摆放
-     */
-    protected void onLayoutHorizontal(){
-        int left = 0;
-        int right = mLeftLayout.getMeasuredWidth();
-        int top = (mWrapHeight - mLeftLayout.getMeasuredHeight()) / 2;
-        mLeftLayout.layout(left,
-                top,
-                right,
-                top + mLeftLayout.getMeasuredHeight());
-
-        left = right;
-        right += mRootNode.getMeasuredWidth();
-        top = (mWrapHeight - mRootNode.getMeasuredHeight()) / 2;
-        mRootNode.layout(left,
-                top,
-                right,
-                top + mRootNode.getMeasuredHeight());
-
-        left = right;
-        right += mRightLayout.getMeasuredWidth();
-        top = (mWrapHeight - mRightLayout.getMeasuredHeight()) / 2;
-        mRightLayout.layout(left,
-                top,
-                right,
-                top + mRightLayout.getMeasuredHeight());
-    }
-
-    /**
-     * 竖直方向摆放
-     */
-    protected void onLayoutVertical(){
-        int left = (mWrapWidth - mTopLayout.getMeasuredWidth()) / 2;
-        int top = 0;
-        int bottom = top + mTopLayout.getMeasuredHeight();
-        mTopLayout.layout(left,
-                top,
-                left + mTopLayout.getMeasuredWidth(),
-                bottom);
-
-        top = bottom;
-        bottom += mRootNode.getMeasuredHeight();
-        left = (mWrapWidth - mRootNode.getMeasuredWidth()) / 2;
-        mRootNode.layout(left,
-                top,
-                left + mRootNode.getMeasuredWidth(),
-                bottom);
-
-        top = bottom;
-        bottom += mBottomLayout.getMeasuredHeight();
-        left = (mWrapWidth - mBottomLayout.getMeasuredWidth()) / 2;
-        mBottomLayout.layout(left,
-                top,
-                left + mBottomLayout.getMeasuredWidth(),
-                bottom);
+        mOrientation.onLayout(changed,l,t,r,b);
     }
 
     private void initChildren(int widthMeasureSpec,int heightMeasureSpec){
         check();
 
-        if(mOrientation == ORIENTATION_HORIZONTAL){
-            mLeftLayout = (TreeLayout) getChildAt(0);
-            mRightLayout = (TreeLayout) getChildAt(2);
-
-            mLeftLayout.getRootNode().setVisibility(GONE);
-            mLeftLayout.lockTree(true);
-            mRightLayout.getRootNode().setVisibility(GONE);
-            mRightLayout.lockTree(true);
+        if(getOrientation() == ORIENTATION_HORIZONTAL){
+            mHorizontal.init();
         }else{
-            mTopLayout = (TreeLayout) getChildAt(0);
-            mBottomLayout = (TreeLayout) getChildAt(2);
-
-            mTopLayout.getRootNode().setVisibility(GONE);
-            mTopLayout.lockTree(true);
-            mBottomLayout.getRootNode().setVisibility(GONE);
-            mBottomLayout.lockTree(true);
+            mVertical.init();
         }
 
         measureChildren(widthMeasureSpec,heightMeasureSpec);
@@ -343,36 +451,10 @@ public class MindMapLayout extends ViewGroup {
             @Override
             public void onGlobalLayout() {
                 getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                if(mOrientation == ORIENTATION_HORIZONTAL){
-                    setDecorDrawerHorizontal(decortator);
-                }else{
-                    setDecorDrawerVertical(decortator);
-                }
+                mOrientation.setDecorDrawer(decortator);
             }
         });
         requestLayout();
-    }
-
-    /**
-     * 设置水平点缀绘制器
-     * @param decortator 点缀绘制器
-     */
-    protected void setDecorDrawerHorizontal(NodeDecoratorDrawer decortator){
-        mDecoratorDrawer = decortator;
-        mSkipDrawDecorator = false;
-        mLeftLayout.setUnionDecorDrawer(decortator);
-        mRightLayout.setUnionDecorDrawer(decortator);
-    }
-
-    /**
-     * 设置竖直点缀绘制器
-     * @param decortator 点缀绘制器
-     */
-    protected void setDecorDrawerVertical(NodeDecoratorDrawer decortator){
-        mDecoratorDrawer = decortator;
-        mSkipDrawDecorator = false;
-        mTopLayout.setUnionDecorDrawer(decortator);
-        mBottomLayout.setUnionDecorDrawer(decortator);
     }
 
     /**
@@ -389,13 +471,7 @@ public class MindMapLayout extends ViewGroup {
      */
     public void skipDrawDecorator(boolean skip){
         mSkipDrawDecorator = skip;
-        if(mOrientation == ORIENTATION_HORIZONTAL){
-            mLeftLayout.skipUnionDrawDecorator(skip);
-            mRightLayout.skipUnionDrawDecorator(skip);
-        }else{
-            mTopLayout.skipUnionDrawDecorator(skip);
-            mBottomLayout.skipUnionDrawDecorator(skip);
-        }
+        mOrientation.skipDrawDecorator(skip);
         invalidate();
     }
 
@@ -433,51 +509,9 @@ public class MindMapLayout extends ViewGroup {
 
         canvas.clipRect(mPaddingClipRect);
 
-        if(mOrientation == ORIENTATION_HORIZONTAL){
-            onDrawDecoratorHorizontal(canvas);
-        }else{
-            onDrawDecoratorVertical(canvas);
-        }
+        mOrientation.onDrawDecorator(canvas);
 
         canvas.restore();
-    }
-
-    private void onDrawDecoratorHorizontal(Canvas canvas){
-        mStartRect.left = mRootNode.getLeft();
-        mStartRect.right = mRootNode.getRight();
-        mStartRect.top = mRootNode.getTop();
-        mStartRect.bottom = mRootNode.getBottom();
-
-        mEndRect.left = mStartRect.right;
-        mEndRect.right = mStartRect.left;
-        mEndRect.top = mStartRect.top;
-        mEndRect.bottom = mStartRect.bottom;
-        mDecoratorDrawer.drawDecorator(canvas,mPaint,mStartRect,mEndRect,mRootNode,mRootNode,Direction.DIRECTION_RIGHT_TO_LEFT);
-
-        mEndRect.left = mStartRect.right;
-        mEndRect.right = mStartRect.left;
-        mEndRect.top = mStartRect.top;
-        mEndRect.bottom = mStartRect.bottom;
-        mDecoratorDrawer.drawDecorator(canvas,mPaint,mStartRect,mEndRect,mRootNode,mRootNode,Direction.DIRECTION_LEFT_TO_RIGHT);
-    }
-
-    private void onDrawDecoratorVertical(Canvas canvas){
-        mStartRect.left = mRootNode.getLeft();
-        mStartRect.right = mRootNode.getRight();
-        mStartRect.top = mRootNode.getTop();
-        mStartRect.bottom = mRootNode.getBottom();
-
-        mEndRect.left = mStartRect.left;
-        mEndRect.right = mStartRect.right;
-        mEndRect.top = mStartRect.top;
-        mEndRect.bottom = mStartRect.top;
-        mDecoratorDrawer.drawDecorator(canvas,mPaint,mStartRect,mEndRect,mRootNode,mRootNode,Direction.DIRECTION_DOWN_TO_UP);
-
-        mEndRect.left = mStartRect.left;
-        mEndRect.right = mStartRect.right;
-        mEndRect.top = mStartRect.bottom;
-        mEndRect.bottom = mStartRect.bottom;
-        mDecoratorDrawer.drawDecorator(canvas,mPaint,mStartRect,mEndRect,mRootNode,mRootNode,Direction.DIRECTION_UP_TO_DOWN);
     }
 
     @Override
@@ -538,35 +572,17 @@ public class MindMapLayout extends ViewGroup {
      * 竖直方向{@link #ORIENTATION_VERTICAL}
      */
     public void setOrientation(int orientation){
-       mOrientation = orientation;
+        if(orientation == ORIENTATION_HORIZONTAL){
+            mOrientation = mHorizontal;
+        }else{
+            mOrientation = mVertical;
+        }
 
         getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
                 getViewTreeObserver().removeOnGlobalLayoutListener(this);
-                if(mOrientation == ORIENTATION_VERTICAL){
-                    if(mTopLayout == null && mBottomLayout == null){
-                        mTopLayout = mLeftLayout;
-                        mBottomLayout = mRightLayout;
-                    }
-
-                    mLeftLayout = null;
-                    mRightLayout = null;
-
-                    mTopLayout.setUnionTreeDirection(Direction.DIRECTION_DOWN_TO_UP);
-                    mBottomLayout.setUnionTreeDirection(Direction.DIRECTION_UP_TO_DOWN);
-                }else{
-                    if(mLeftLayout == null && mRightLayout == null){
-                        mLeftLayout = mTopLayout;
-                        mRightLayout = mBottomLayout;
-                    }
-
-                    mTopLayout = null;
-                    mBottomLayout = null;
-
-                    mLeftLayout.setUnionTreeDirection(Direction.DIRECTION_RIGHT_TO_LEFT);
-                    mRightLayout.setUnionTreeDirection(Direction.DIRECTION_LEFT_TO_RIGHT);
-                }
+                mOrientation.onOrientationChanged();
             }
         });
         requestLayout();
@@ -577,7 +593,7 @@ public class MindMapLayout extends ViewGroup {
      * @return 布局方向
      */
     public int getOrientation(){
-        return mOrientation;
+        return mOrientation instanceof Horizontal ? ORIENTATION_HORIZONTAL : ORIENTATION_VERTICAL;
     }
 
     /**
