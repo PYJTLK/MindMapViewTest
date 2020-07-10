@@ -1,4 +1,4 @@
-package com.pyjtlk.widget;
+package com.pyjtlk.widget.treelayout;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -9,6 +9,12 @@ import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+
+import com.pyjtlk.container.tree.Node;
+import com.pyjtlk.widget.Direction;
+import com.pyjtlk.widget.NodeDecoratorDrawer;
+import com.pyjtlk.widget.R;
+import com.pyjtlk.widget.SearchListener;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -45,6 +51,14 @@ public class TreeLayout extends ViewGroup {
         public LayoutParams(ViewGroup.LayoutParams source) {
             super(source);
         }
+
+        public LayoutParams(int width, int height) {
+            super(width, height);
+        }
+
+        public LayoutParams(MarginLayoutParams source) {
+            super(source);
+        }
     }
 
     private static class TreeException extends RuntimeException{
@@ -53,14 +67,30 @@ public class TreeLayout extends ViewGroup {
         }
     }
 
-    private static class Node{
-        View parentNodeView;
-        View thisView;
+    /**
+     * 树的全局参数设置
+     */
+    public static class TreeGlobalParams{
+        public int levelInterval;
+        public Direction direction;
+        public boolean locked;
+        public NodeDecoratorDrawer nodeDecoratorDrawer;
 
-        public Node(View parentNodeView, View thisView) {
-            this.parentNodeView = parentNodeView;
-            this.thisView = thisView;
+        public TreeGlobalParams(){
         }
+
+        public TreeGlobalParams(TreeLayout treeLayout){
+            levelInterval = treeLayout.getLevelInterval();
+            direction = new Direction();
+            direction.direction = treeLayout.getTreeDirection().direction;
+            locked = treeLayout.isLocked();
+            nodeDecoratorDrawer = treeLayout.getDecoratorDrawer();
+        }
+    }
+
+    public TreeLayout(Context context){
+        super(context);
+        init(context,null);
     }
 
     public TreeLayout(Context context, AttributeSet attrs) {
@@ -74,12 +104,21 @@ public class TreeLayout extends ViewGroup {
     }
 
     private void init(Context context,AttributeSet attrs){
-        TypedArray typedArray = context.obtainStyledAttributes(attrs,R.styleable.TreeLayout);
-        int treeDirection = typedArray.getInt(R.styleable.TreeLayout_treeDirection,0);
-        mLevelInterval = typedArray.getDimensionPixelSize(R.styleable.TreeLayout_levelInterval,0);
-        mLocked = typedArray.getBoolean(R.styleable.TreeLayout_locked,true);
-        mMaxBranch = typedArray.getInt(R.styleable.TreeLayout_branch,BRENCH_INFINATE);
-        typedArray.recycle();
+        int treeDirection = 0;
+
+        if(attrs != null) {
+            TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.TreeLayout);
+            treeDirection = typedArray.getInt(R.styleable.TreeLayout_treeDirection, 0);
+            mLevelInterval = typedArray.getDimensionPixelSize(R.styleable.TreeLayout_levelInterval, 0);
+            mLocked = typedArray.getBoolean(R.styleable.TreeLayout_locked, true);
+            mMaxBranch = typedArray.getInt(R.styleable.TreeLayout_branch, BRENCH_INFINATE);
+            typedArray.recycle();
+        }else{
+            treeDirection = 0;
+            mLevelInterval = 0;
+            mLocked = true;
+            mMaxBranch = BRENCH_INFINATE;
+        }
 
         mTreeDirection = new Direction();
         mTreeDirection.direction = treeDirection;
@@ -552,6 +591,14 @@ public class TreeLayout extends ViewGroup {
     }
 
     /**
+     * 获取树的点缀绘制器
+     * @return 树的点缀绘制器
+     */
+    public NodeDecoratorDrawer getDecoratorDrawer(){
+        return mDecoratorDrawer;
+    }
+
+    /**
      * 设置点缀绘制器
      * @param decortator 点缀绘制器
      */
@@ -588,12 +635,28 @@ public class TreeLayout extends ViewGroup {
         bfs(treeSearchListener);
     }
 
+    /**
+     * 设置树的方向，只会作用于本树，不会作用于子树
+     * @param direction 方向，详见
+     * {@link Direction#DIRECTION_LEFT_TO_RIGHT
+     * @link Direction#DIRECTION_RIGHT_TO_LEFT
+     * @link Direction#DIRECTION_DOWN_TO_UP
+     * @link Direction#DIRECTION_UP_TO_DOWN}
+     */
     public void setTreeDirection(int direction){
         mTreeDirection.direction = direction;
         requestLayout();
         invalidate();
     }
 
+    /**
+     * 设置树的方向，会作用于本树和所有子树
+     * @param direction 方向，详见
+     * {@link Direction#DIRECTION_LEFT_TO_RIGHT
+     * @link Direction#DIRECTION_RIGHT_TO_LEFT
+     * @link Direction#DIRECTION_DOWN_TO_UP
+     * @link Direction#DIRECTION_UP_TO_DOWN}
+     */
     public void setUnionTreeDirection(int direction){
         mTreeDirection.direction = direction;
 
@@ -827,11 +890,11 @@ public class TreeLayout extends ViewGroup {
             return;
         }
 
-        List<Node> nodeQueue = new LinkedList<>();
+        List<Node<View>> nodeQueue = new LinkedList<>();
         bfsInside(this,null,searchListener,nodeQueue);
     }
 
-    protected boolean bfsInside(View thisNode,View parentNode,SearchListener searchListener,List<Node> nodeQueue){
+    protected boolean bfsInside(View thisNode,View parentNode,SearchListener searchListener,List<Node<View>> nodeQueue){
         if(thisNode instanceof TreeLayout){
             searchListener.onTreeStart((TreeLayout) thisNode);
 
@@ -859,8 +922,8 @@ public class TreeLayout extends ViewGroup {
             return false;
         }
 
-        Node treeNode = nodeQueue.remove(0);
-        return bfsInside(treeNode.thisView,treeNode.parentNodeView,searchListener,nodeQueue);
+        Node<View> treeNode = nodeQueue.remove(0);
+        return bfsInside(treeNode.getThisNode(),treeNode.getParentNode(),searchListener,nodeQueue);
     }
 
     /**
@@ -872,7 +935,7 @@ public class TreeLayout extends ViewGroup {
     }
 
     /**
-     * 跳过装饰物绘制
+     * 跳过装饰物绘制，只会作用于本树，不会作用于子树
      * @param skip 是否跳过
      */
     public void skipDrawDecorator(boolean skip){
@@ -880,6 +943,10 @@ public class TreeLayout extends ViewGroup {
         invalidate();
     }
 
+    /**
+     * 跳过装饰物绘制作用于本树和所有子树
+     * @param skip 是否跳过
+     */
     public void skipUnionDrawDecorator(boolean skip){
         mSkipDrawDecorator = skip;
 
@@ -901,5 +968,9 @@ public class TreeLayout extends ViewGroup {
         };
 
         bfs(treeSearchListener);
+    }
+
+    public int getMaxBranch(){
+        return mMaxBranch;
     }
 }

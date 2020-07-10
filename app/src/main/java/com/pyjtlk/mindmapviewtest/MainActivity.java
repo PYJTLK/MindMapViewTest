@@ -2,39 +2,32 @@ package com.pyjtlk.mindmapviewtest;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
-import com.pyjtlk.widget.MindMapLayout;
-import com.pyjtlk.widget.TreeLayout;
+import com.pyjtlk.container.tree.xmlhandler.FloatTreeXmlHandler;
+import com.pyjtlk.container.tree.Tree;
+import com.pyjtlk.widget.treelayout.TreeLayout;
 
 
 public class MainActivity extends AppCompatActivity {
-
-    private MindMapLayout mindMapLayout;
-    private Button button;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        button = findViewById(R.id.button);
-
-        mindMapLayout = findViewById(R.id.mindMapLayout);
-        ClassicDecoratorFactory factory = new ClassicDecoratorFactory(6,12,150,Color.WHITE);
-        mindMapLayout.setDecorDrawer(factory.createDecorator());
-        mindMapLayout.setOrientation(MindMapLayout.ORIENTATION_HORIZONTAL);
     }
 
     public void oncliked(View view) {
-        //button.setText(mindMapLayout.isLocked() ? "locked" : "unlocked");
-        //mindMapLayout.lockMap(!mindMapLayout.isLocked());
-        mindMapLayout.setOrientation(mindMapLayout.getOrientation() == MindMapLayout.ORIENTATION_HORIZONTAL ?
-               MindMapLayout.ORIENTATION_VERTICAL : MindMapLayout.ORIENTATION_HORIZONTAL);
+        Intent intent = new Intent(this,TreeLayoutTestActivity.class);
+        startActivity(intent);
+    }
 
-        //mindMapLayout.skipDrawDecorator(!mindMapLayout.isSkipDrawDecorator());
+    public void oncliked1(View view) {
+        Intent intent = new Intent(this,MindMapTestActivity.class);
+        startActivity(intent);
     }
 }

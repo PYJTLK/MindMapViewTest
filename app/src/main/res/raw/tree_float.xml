@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<tree data="0">
+    <node data="1.3"/>
+    <node data="2.1"/>
+    <node data="3.66"/>
+    <tree data="4.12">
+        <node data="5.45"/>
+        <node data="6.4"/>
+        <node data="7"/>
+        <tree data="8">
+            <node data="9"/>
+            <node data="10"/>
+            <node data="11"/>
+        </tree>
+    </tree>
+</tree>

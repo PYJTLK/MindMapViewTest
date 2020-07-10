@@ -5,7 +5,6 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 
 import com.pyjtlk.widget.Direction;
-import com.pyjtlk.widget.TreeLayout;
 
 public class DocumentLineDrawer extends DirectLineDrawer{
     private int mLevelInterval;

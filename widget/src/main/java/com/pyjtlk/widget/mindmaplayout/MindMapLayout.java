@@ -1,4 +1,4 @@
-package com.pyjtlk.widget;
+package com.pyjtlk.widget.mindmaplayout;
 
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -10,6 +10,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+
+import com.pyjtlk.widget.Direction;
+import com.pyjtlk.widget.NodeDecoratorDrawer;
+import com.pyjtlk.widget.R;
+import com.pyjtlk.widget.treelayout.TreeLayout;
 
 public class MindMapLayout extends ViewGroup {
     /**
@@ -166,7 +171,7 @@ public class MindMapLayout extends ViewGroup {
             mEndRect.right = mStartRect.left;
             mEndRect.top = mStartRect.top;
             mEndRect.bottom = mStartRect.bottom;
-            mDecoratorDrawer.drawDecorator(canvas,mPaint,mStartRect,mEndRect,mRootNode,mRootNode,Direction.DIRECTION_RIGHT_TO_LEFT);
+            mDecoratorDrawer.drawDecorator(canvas,mPaint,mStartRect,mEndRect,mRootNode,mRootNode, Direction.DIRECTION_RIGHT_TO_LEFT);
 
             mEndRect.left = mStartRect.right;
             mEndRect.right = mStartRect.left;
@@ -353,7 +358,7 @@ public class MindMapLayout extends ViewGroup {
     }
 
     private void init(Context context, AttributeSet attrs){
-        TypedArray typedArray = context.obtainStyledAttributes(attrs,R.styleable.MindMapLayout);
+        TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.MindMapLayout);
         int orientation = typedArray.getInt(R.styleable.MindMapLayout_orientation,0);
         mLocked = typedArray.getBoolean(R.styleable.MindMapLayout_mapLocked,true);
         typedArray.recycle();

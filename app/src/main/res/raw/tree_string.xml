@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<tree data="root">
+    <node data="node0"/>
+    <node data="node1"/>
+    <node data="node2"/>
+    <tree data="sub root">
+        <node data="sub node0"/>
+        <node data="sub node1"/>
+        <node data="sub node2"/>
+    </tree>
+</tree>

@@ -1,2 +1,2 @@
-include ':app', ':widget'
+include ':app', ':widget', ':container'
 rootProject.name='MindMapViewTest'
