@@ -33,10 +33,10 @@ public abstract class AbsTreeAdapter<D>{
     public void bind(TreeLayout treeLayout){
         mTreeLayout = treeLayout;
         mContext = mTreeLayout.getContext();
-        createTreeData();
+        loadViewsFromData();
     }
 
-    private void createTreeData(){
+    private void loadViewsFromData(){
         LayoutInflater layoutInflater = LayoutInflater.from(mContext);
         List<TreeLayout> queue = new LinkedList<>();
 

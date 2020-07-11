@@ -1,12 +1,12 @@
 package com.pyjtlk.container.tree.xmlhandler;
 
+import com.pyjtlk.container.stack.Stack;
 import com.pyjtlk.container.tree.Tree;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-import java.util.Stack;
 
 public abstract class AbsTreeXmlHandler<D> extends DefaultHandler {
     public static final String XML_ELEMENT_TREE = "tree";

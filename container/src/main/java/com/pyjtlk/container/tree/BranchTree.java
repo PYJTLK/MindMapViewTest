@@ -33,6 +33,8 @@ public class BranchTree<D> extends Tree<D>{
 
     @Override
     public void insertChild(Tree<D> childTree) {
+        typeCheck(childTree);
+
         if(!checkInsert(1))
             throw new IllegalArgumentException("branch should <= " + mBranch);
         super.insertChild(childTree);
@@ -40,6 +42,8 @@ public class BranchTree<D> extends Tree<D>{
 
     @Override
     public void insertChild(Tree<D> childTree, int index) {
+        typeCheck(childTree);
+
         if(!checkInsert(1))
             throw new IllegalArgumentException("branch should <= " + mBranch);
         super.insertChild(childTree, index);
@@ -57,5 +61,11 @@ public class BranchTree<D> extends Tree<D>{
         if (!checkInsert(children.size()))
             throw new IllegalArgumentException("branch should <= " + mBranch);
         super.insertChildren(children, index);
+    }
+
+    private void typeCheck(Tree<D> tree){
+        if(!(tree instanceof BranchTree)){
+            throw new IllegalArgumentException(tree + "is not a BranchTree");
+        }
     }
 }
