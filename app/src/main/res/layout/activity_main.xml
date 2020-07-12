@@ -5,13 +5,13 @@
 
     <Button
         android:layout_width="100dp"
-        android:layout_height="50dp"
+        android:layout_height="wrap_content"
         android:text="树测试"
         android:onClick="oncliked"/>
 
     <Button
         android:layout_width="100dp"
-        android:layout_height="50dp"
+        android:layout_height="wrap_content"
         android:text="思维导图测试"
         android:onClick="oncliked1"/>
 </LinearLayout>

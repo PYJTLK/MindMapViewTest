@@ -5,8 +5,6 @@ import com.pyjtlk.widget.drawerfactory.AbsDecoratorFactory;
 import com.pyjtlk.widget.linedrawer.ConnectPointDrawer;
 import com.pyjtlk.widget.linedrawer.CurveDrawer;
 import com.pyjtlk.widget.framedrawer.RectFrameDrawer;
-import com.pyjtlk.widget.linedrawer.DirectLineDrawer;
-import com.pyjtlk.widget.linedrawer.DocumentLineDrawer;
 
 public class ClassicDecoratorFactory extends AbsDecoratorFactory {
     private int mLineWidth;

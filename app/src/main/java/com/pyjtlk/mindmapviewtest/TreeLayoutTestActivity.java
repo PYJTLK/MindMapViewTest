@@ -27,7 +27,7 @@ public class TreeLayoutTestActivity extends AppCompatActivity {
         treeLayout.loadViewsFormData(tree,new MyTreeContentLoader());
     }
 
-    int direction = 0;
+    int direction = 1;
 
     public void oncliked(View view) {
         treeLayout.lockTree(false);

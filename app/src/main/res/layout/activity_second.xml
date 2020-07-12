@@ -12,7 +12,8 @@
         android:id="@+id/button"
         android:layout_width="100dp"
         android:layout_height="50dp"
-        android:onClick="oncliked"/>
+        android:onClick="oncliked"
+        android:text="切换方向"/>
 
     <com.pyjtlk.widget.treelayout.TreeLayout
         android:id="@+id/treeLayout"
