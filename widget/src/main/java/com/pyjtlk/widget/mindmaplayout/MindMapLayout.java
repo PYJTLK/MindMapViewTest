@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 
+import com.pyjtlk.container.tree.Tree;
 import com.pyjtlk.widget.Direction;
 import com.pyjtlk.widget.NodeDecoratorDrawer;
 import com.pyjtlk.widget.R;
@@ -68,6 +69,10 @@ public class MindMapLayout extends ViewGroup {
         protected abstract void skipDrawDecorator(boolean skip);
 
         protected abstract void setDecorDrawer(NodeDecoratorDrawer nodeDecoratorDrawer);
+
+        protected abstract void configTree(TreeLayout.TreeGlobalParams treeGlobalParams);
+
+        protected abstract <D> void loadViewsFromData(Tree<D> tree1, Tree<D> tree2, TreeLayout.TreeContentLoader<D> treeContentLoader);
     }
 
     private class Horizontal extends Orientation{
@@ -76,9 +81,18 @@ public class MindMapLayout extends ViewGroup {
             mLeftLayout = (TreeLayout) getChildAt(0);
             mRightLayout = (TreeLayout) getChildAt(2);
 
-            mLeftLayout.getRootNode().setVisibility(GONE);
+            View rootNode;
+
+            rootNode = mLeftLayout.getRootNode();
+            if(rootNode != null){
+                rootNode.setVisibility(GONE);
+            }
             mLeftLayout.lockTree(true);
-            mRightLayout.getRootNode().setVisibility(GONE);
+
+            rootNode = mRightLayout.getRootNode();
+            if(rootNode != null){
+                rootNode.setVisibility(GONE);
+            }
             mRightLayout.lockTree(true);
         }
 
@@ -196,8 +210,8 @@ public class MindMapLayout extends ViewGroup {
 
         @Override
         protected void skipDrawDecorator(boolean skip) {
-            mLeftLayout.skipUnionDrawDecorator(skip);
-            mRightLayout.skipUnionDrawDecorator(skip);
+            mLeftLayout.skipWholeDrawDecorator(skip);
+            mRightLayout.skipWholeDrawDecorator(skip);
         }
 
         @Override
@@ -206,6 +220,26 @@ public class MindMapLayout extends ViewGroup {
             mSkipDrawDecorator = false;
             mLeftLayout.setUnionDecorDrawer(nodeDecoratorDrawer);
             mRightLayout.setUnionDecorDrawer(nodeDecoratorDrawer);
+        }
+
+        @Override
+        protected void configTree(TreeLayout.TreeGlobalParams treeGlobalParams) {
+            treeGlobalParams.direction = new Direction();
+            TreeLayout.TreeGlobalParams leftParams = new TreeLayout.TreeGlobalParams(treeGlobalParams);
+            leftParams.direction = new Direction();
+            leftParams.direction.direction = Direction.DIRECTION_RIGHT_TO_LEFT;
+            mLeftLayout.configWholeTree(leftParams);
+
+            TreeLayout.TreeGlobalParams rightParams = new TreeLayout.TreeGlobalParams(treeGlobalParams);
+            rightParams.direction = new Direction();
+            rightParams.direction.direction = Direction.DIRECTION_LEFT_TO_RIGHT;
+            mRightLayout.configWholeTree(rightParams);
+        }
+
+        @Override
+        protected <D> void loadViewsFromData(Tree<D> tree1, Tree<D> tree2, TreeLayout.TreeContentLoader<D> treeContentLoader) {
+            mLeftLayout.loadViewsFormData(tree1,treeContentLoader);
+            mRightLayout.loadViewsFormData(tree2,treeContentLoader);
         }
     }
 
@@ -334,8 +368,8 @@ public class MindMapLayout extends ViewGroup {
 
         @Override
         protected void skipDrawDecorator(boolean skip) {
-            mTopLayout.skipUnionDrawDecorator(skip);
-            mBottomLayout.skipUnionDrawDecorator(skip);
+            mTopLayout.skipWholeDrawDecorator(skip);
+            mBottomLayout.skipWholeDrawDecorator(skip);
         }
 
         @Override
@@ -345,6 +379,36 @@ public class MindMapLayout extends ViewGroup {
             mTopLayout.setUnionDecorDrawer(nodeDecoratorDrawer);
             mBottomLayout.setUnionDecorDrawer(nodeDecoratorDrawer);
         }
+
+        @Override
+        protected void configTree(TreeLayout.TreeGlobalParams treeGlobalParams) {
+            TreeLayout.TreeGlobalParams topParams = new TreeLayout.TreeGlobalParams(treeGlobalParams);
+            topParams.direction = new Direction();
+            topParams.direction.direction = Direction.DIRECTION_DOWN_TO_UP;
+            mTopLayout.configWholeTree(topParams);
+
+            TreeLayout.TreeGlobalParams bottomParams = new TreeLayout.TreeGlobalParams(treeGlobalParams);
+            bottomParams.direction = new Direction();
+            bottomParams.direction.direction = Direction.DIRECTION_RIGHT_TO_LEFT;
+            mBottomLayout.configWholeTree(bottomParams);
+        }
+
+        @Override
+        protected <D> void loadViewsFromData(Tree<D> tree1, Tree<D> tree2, TreeLayout.TreeContentLoader<D> treeContentLoader) {
+            mTopLayout.loadViewsFormData(tree1,treeContentLoader);
+            mBottomLayout.loadViewsFormData(tree2,treeContentLoader);
+        }
+    }
+
+    /**
+     * 加载监听器
+     */
+    public interface OnLoadListener{
+        /**
+         * 在思维导图的两棵子树加载完毕时回调
+         * @param mindMapLayout
+         */
+        void onLoadFinished(MindMapLayout mindMapLayout);
     }
 
     public MindMapLayout(Context context, AttributeSet attrs) {
@@ -363,7 +427,7 @@ public class MindMapLayout extends ViewGroup {
         mLocked = typedArray.getBoolean(R.styleable.MindMapLayout_mapLocked,true);
         typedArray.recycle();
 
-        mSkipDrawDecorator = true;
+        mSkipDrawDecorator = false;
 
         mPaddingClipRect = new Rect();
         mStartRect = new Rect();
@@ -452,14 +516,12 @@ public class MindMapLayout extends ViewGroup {
      * @param decortator 点缀绘制器
      */
     public void setDecorDrawer(NodeDecoratorDrawer decortator){
-        getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+        doOnLoadFinished(new OnLoadListener() {
             @Override
-            public void onGlobalLayout() {
-                getViewTreeObserver().removeOnGlobalLayoutListener(this);
+            public void onLoadFinished(MindMapLayout mindMapLayout) {
                 mOrientation.setDecorDrawer(decortator);
             }
         });
-        requestLayout();
     }
 
     /**
@@ -583,14 +645,12 @@ public class MindMapLayout extends ViewGroup {
             mOrientation = mVertical;
         }
 
-        getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+        doOnLoadFinished(new OnLoadListener() {
             @Override
-            public void onGlobalLayout() {
-                getViewTreeObserver().removeOnGlobalLayoutListener(this);
+            public void onLoadFinished(MindMapLayout mindMapLayout) {
                 mOrientation.onOrientationChanged();
             }
         });
-        requestLayout();
     }
 
     /**
@@ -655,5 +715,75 @@ public class MindMapLayout extends ViewGroup {
      */
     public final View getRootNode(){
         return mRootNode;
+    }
+
+    /**
+     * 设置思维导图两棵子树的参数
+     * @param params 全局参数，注意此时的全局参数的方向是不会起作用的{@link Direction}
+     */
+    public void setTreeGlobalParams(TreeLayout.TreeGlobalParams params){
+        doOnLoadFinished(new OnLoadListener() {
+            @Override
+            public void onLoadFinished(MindMapLayout mindMapLayout) {
+                mOrientation.configTree(params);
+            }
+        });
+    }
+
+    /**
+     * 通过Tree来加载子控件
+     * @param tree1 思维导图的第一棵子树，如果思维导图是水平的则为左树，思维导图为竖直的则为上树
+     * @param tree2 思维导图的第二棵子树，如果思维导图是水平的则为右树，思维导图为竖直的则为下树
+     * @param treeContentLoader 子控件加载器
+     */
+    public void loadViewsFromData(Tree tree1, Tree tree2, TreeLayout.TreeContentLoader treeContentLoader){
+        loadViewsFromData(tree1,tree2,treeContentLoader,null);
+    }
+
+    /**
+     * 通过Tree来加载子控件
+     * @param tree1 思维导图的第一棵子树，如果思维导图是水平的则为左树，思维导图为竖直的则为上树
+     * @param tree2 思维导图的第二棵子树，如果思维导图是水平的则为右树，思维导图为竖直的则为下树
+     * @param treeContentLoader 子控件加载器
+     * @param globalParams 全局参数，用于设置思维导图两棵子树的参数。注意此时的全局参数的方向是不会起作用的{@link Direction}
+     */
+    public void loadViewsFromData(Tree tree1, Tree tree2, TreeLayout.TreeContentLoader treeContentLoader, TreeLayout.TreeGlobalParams globalParams){
+        mDecoratorDrawer = globalParams.nodeDecoratorDrawer;
+        doOnLoadFinished(new OnLoadListener() {
+            @Override
+            public void onLoadFinished(MindMapLayout mindMapLayout) {
+                if(globalParams != null){
+                    mOrientation.configTree(globalParams);
+                }
+                mOrientation.loadViewsFromData(tree1,tree2,treeContentLoader);
+            }
+        });
+    }
+
+    /**
+     * 可以通过此方法在思维导图的两个子树加载完毕时回调
+     * @param loadListener 加载监听器
+     */
+    public void doOnLoadFinished(OnLoadListener loadListener){
+        if(loadListener == null){
+            return;
+        }
+
+        getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                loadListener.onLoadFinished(MindMapLayout.this);
+            }
+        });
+        requestLayout();
+    }
+
+    /**
+     * 是否为水平思维导图
+     * @return 是否为水平思维导图
+     */
+    public boolean isHorizontal(){
+        return mOrientation == mHorizontal;
     }
 }

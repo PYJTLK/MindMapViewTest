@@ -5,10 +5,37 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MindMapTestActivity">
+    tools:context=".MindMapTestActivity"
+    android:orientation="vertical">
+
+    <Button
+        android:layout_width="100dp"
+        android:layout_height="50dp"
+        android:onClick="oncliked"/>
 
     <com.pyjtlk.widget.mindmaplayout.MindMapLayout
+        android:id="@+id/mindmap"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        app:orientation="horizontal"
+        app:mapLocked="false"
+        android:background="#A0A0">
+
+        <com.pyjtlk.widget.treelayout.TreeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+        </com.pyjtlk.widget.treelayout.TreeLayout>
+
+        <Button
+            android:id="@+id/button"
+            android:layout_width="100dp"
+            android:layout_height="50dp"
+            android:text="root"/>
+
+        <com.pyjtlk.widget.treelayout.TreeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+        </com.pyjtlk.widget.treelayout.TreeLayout>
+
     </com.pyjtlk.widget.mindmaplayout.MindMapLayout>
 </LinearLayout>
