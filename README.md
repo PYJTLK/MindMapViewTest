@@ -6,5 +6,5 @@ allprojects {
 }
 
 dependencies {
-	        implementation 'com.github.PYJTLK:MindMapViewTest:1.2'
+	        implementation 'com.github.PYJTLK:MindMapViewTest:1.3'
 }
